@@ -1,0 +1,398 @@
+package animeTracker;
+import java.time.LocalDate;
+import java.util.Scanner;
+import java.sql.Date;
+
+public class MainMenu {
+	public static void main(String[] args) {
+		displayMainMenu();
+		
+	}
+	
+	//method will have all menu screens
+	public static void displayMainMenu() {
+		System.out.println("*****Anime Tracker*****\n\tMain Menu\n");
+		System.out.println("   1. Anime series");
+		System.out.println("   2. Anime Movies");
+		System.out.println("   3. Watch List");
+		System.out.println("   4. Exit");
+		System.out.println("enter a number to select");
+		System.out.println("***********************");
+		
+		Scanner input = new Scanner(System.in); //scanner object
+		
+		//call the menus based on the users choice
+		if(input.hasNextInt()) { //check if user input is a # and between 1-4
+		int choice = input.nextInt();
+		if (choice >= 1 && choice <= 4) { //check if number is 1-4
+		switch (choice) {
+			case 1: 
+				animeSeriesMenu();
+				break;
+			case 2:
+				animeMovieMenu();
+				break;
+			case 3:
+				watchListMenu();
+				break;
+			case 4:
+				System.exit(0);
+				break;
+			default:		
+		}
+	} else {
+		System.out.println("Invalid choice. Please enter a number between 1-4.");
+		displayMainMenu();
+	}		
+		} else {
+			System.out.println("Invalid choice. Please enter a number between 1 - 4.");
+			displayMainMenu();
+		}
+		input.close();
+	}
+	public static void animeSeriesMenu() {
+		System.out.println("*****Anime Tracker*****\n   Anime Series Menu\n");
+		System.out.println("   1. Add Anime Series");
+		System.out.println("   2. Update Anime Series");
+		System.out.println("   3. Remove anime Series");
+		System.out.println("   4. List Anime Series");
+		System.out.println("   5. Search Anime Series");
+		System.out.println("   6. Return to Main Menu");
+		System.out.println("enter a number to select");
+		System.out.println("***********************");
+		
+		Scanner input = new Scanner(System.in); //scanner object
+		
+		if(input.hasNextInt()) { //check if input is an int
+		int choice =input.nextInt();
+		if (choice >= 1 && choice <= 6) { //check if choice is 1-6 included
+		switch (choice) {
+			case 1:
+				addAnimeSeries();
+				break;
+			case 2:
+				updateAnimeSeries();
+				break;
+			case 3:
+				removeAnimeSeries();
+				break;
+			case 4:
+				listAnimeSeries();
+				break;
+			case 5:
+				searchAnimeSeries();
+				break;
+			case 6:
+				displayMainMenu();
+				break;
+			default:
+		}
+		} else {
+			System.out.println("Invalid choice. Please enter choice 1 - 6");
+			animeSeriesMenu();
+		}
+	} else {
+		System.out.println("Invalid choice. Please enter choice 1 - 6");
+		animeSeriesMenu();
+	}
+		input.close();
+	}
+//call method to update anime series based on the title
+public static void updateAnimeSeries() {
+	Scanner input = new Scanner(System.in);
+	System.out.print("Enter title of the anime you want to update: ");
+	String title = input.nextLine();
+	
+	if(title.length() == 0) { //if user doesn't enter title send back to the menu with error message
+		System.out.println("must enter title of anime series");
+		animeSeriesMenu();
+	}
+	DatabaseManager manager = new DatabaseManager();
+	manager.updateAnimeSeries(title);
+	input.close();
+	}
+
+//method to get input and create anime series object
+public static void addAnimeSeries() {
+	Scanner input = new Scanner(System.in);
+	//collect input from user
+	System.out.print("Enter anime title: ");
+	String title = input.nextLine();
+	
+	if(title.length() == 0) { //make sure string isn't empty
+		System.out.println("must provide anime series title");
+		addAnimeSeries();
+	}
+	
+	Date date = null; //the date going to the anime series constructor
+	int counter = 0; //counter to control loop
+	LocalDate thisYear = LocalDate.now(); //todays date
+	while(counter == 0) { 
+		System.out.print("Enter anime release date: (yyyy-mm-dd) or enter to continue ");
+		String releaseDate = input.nextLine();
+		
+		if(releaseDate.isEmpty()) { //if input is empty break out of loop
+			break;
+		}
+		
+		try {//try to turn input into a date
+			date = Date.valueOf(releaseDate);
+			if(date.toLocalDate().getYear() > 1920 && date.toLocalDate().getYear() < (thisYear.getYear() + 10)) { //date must between 190 - the current year + 10
+				counter++;
+		} else {
+			System.out.println("Invalid date please enter a year after 1920 and before " + (thisYear.getYear() + 10));
+		}
+			
+		} catch (Exception e) {
+			System.out.println("Invalid input enter (yyyy-mm-dd)");
+		} 
+	
+	}
+	int totalEpisodes = 0;
+	int count = 0; //counter to control while loop
+	while(count == 0) {
+	System.out.print("Enter total number of episodes: ");
+	String total = input.nextLine();
+	if(total.isEmpty()) {
+		break;
+	}
+	try {
+		totalEpisodes = Integer.valueOf(total); //try to convert the string to an integer ensure its within range then get out of loop
+		if(totalEpisodes > 0 && totalEpisodes <= 3000) {
+			count++;
+		} else {
+			System.out.println("Invalid number of episodes please enter a number between 1 - 3000");
+		}
+	} catch (NumberFormatException e) {
+		System.out.print("Invalid input please enter a number\n");
+	}
+	
+	}
+	
+		
+		System.out.print("Enter genre(s): "); //genre accepts null values
+		String genre = input.nextLine();
+		if(genre.isEmpty()) {
+			genre = null;
+		}
+	
+	System.out.print("Enter anime description: "); //description accepts null values
+	String description = input.nextLine();
+	if(description.isEmpty()) {
+		description = null;
+	}
+
+	
+	//create anime series object
+	AnimeSeries animeOb = new AnimeSeries(title, date, totalEpisodes, genre, description);
+	
+	DatabaseManager manager = new DatabaseManager(); //database object
+	manager.addToDatabase(animeOb);
+	
+
+	//input.nextLine(); //consume a new line (this line was giving me errors)
+	input.close();
+}
+
+//call delete from database function with the title of the anime series
+public static void removeAnimeSeries() {
+	Scanner input = new Scanner(System.in);
+	System.out.print("Enter anime series title to delete: ");
+	String title = input.nextLine();
+	
+	if(title.length() == 0) {
+		System.out.println("must enter anime series title");
+		removeAnimeSeries();
+	}
+	DatabaseManager manager = new DatabaseManager();
+	manager.deleteFromDatabase(title);
+	
+	input.close();
+	
+}
+
+public static void searchAnimeSeries() {
+	Scanner input = new Scanner(System.in);
+	System.out.print("Enter title of anime series to search: ");
+	String title = input.nextLine();
+	
+	if(title.length() == 0) {
+		System.out.println("must enter anime series title");
+		searchAnimeSeries();
+	}
+	
+	DatabaseManager manager = new DatabaseManager();
+	manager.searchAnimeSeries(title);
+	
+	input.close();
+}
+
+public static void listAnimeSeries() {
+	DatabaseManager manager = new DatabaseManager();
+	manager.List();
+}
+public static void animeMovieMenu() {
+	System.out.println("*****Anime Tracker*****\n   Anime Movie Menu\n");
+	System.out.println("   1. Add Movie");
+	System.out.println("   2. Update Movie");
+	System.out.println("   3. Remove Movie");
+	System.out.println("   4. List Movie");
+	System.out.println("   5. Search Movie");
+	System.out.println("   6. Return to Main Menu");
+	System.out.println("enter a number to select");
+	System.out.println("***********************");
+	
+	Scanner input = new Scanner(System.in); //scanner object
+	
+	if(input.hasNextInt()) {
+	int choice =input.nextInt();
+	switch (choice) {
+		case 1:
+			addMovie();
+			break;
+		case 2:
+			System.out.println("...Updating movie");
+			break;
+		case 3:
+			System.out.println("Remove movie");
+			break;
+		case 4:
+			System.out.println("List movie");
+			break;
+		case 5:
+			System.out.println("Search movie");
+			break;
+		case 6:
+			displayMainMenu();
+			break;
+		default:
+	}
+} else {
+	System.out.println("Invalid choice. Please enter choice 1 - 6");
+	animeMovieMenu();
+}
+	input.close();
+		
+	}
+
+public static void addMovie() {
+	Scanner input = new Scanner(System.in);
+	//enter movie title
+	System.out.print("Enter movie title: ");
+	String title = input.nextLine();
+	if(title.length() == 0) {
+		System.out.println("must provide movie title");
+		addMovie();
+	}
+	
+	Date date = null; //the date going to the anime series constructor
+	int counter = 0; //counter to control loop
+	LocalDate thisYear = LocalDate.now(); //todays date
+	while(counter == 0) { 
+		System.out.print("Enter movie release date: (yyyy-mm-dd) or enter to continue ");
+		String releaseDate = input.nextLine();
+		
+		if(releaseDate.isEmpty()) { //if input is empty break out of loop
+			break;
+		}
+		
+		try {//try to turn input into a date
+			date = Date.valueOf(releaseDate);
+			if(date.toLocalDate().getYear() > 1920 && date.toLocalDate().getYear() < (thisYear.getYear() + 10)) { //date must between 190 - the current year + 10
+				counter++;
+		} else {
+			System.out.println("Invalid date please enter a year after 1920 and before " + (thisYear.getYear() + 10));
+		}
+			
+		} catch (Exception e) {
+			System.out.println("Invalid input enter (yyyy-mm-dd)");
+		} 
+	
+	}
+	
+	int duration = 0;
+	int count = 0; //counter to control while loop
+	while(count == 0) {
+	System.out.print("Enter movie duration in minutes: ");
+	String total = input.nextLine();
+	if(total.isEmpty()) {
+		break;
+	}
+	try {
+		duration = Integer.valueOf(total); //try to convert the string to an integer ensure its within range then get out of loop
+		if(duration > 0 && duration <= 300) {
+			count++;
+		} else {
+			System.out.println("Invalid number of episodes please enter a number between 1 - 3000");
+		}
+	} catch (NumberFormatException e) {
+		System.out.print("Invalid input please enter a number\n");
+	}
+	
+	}
+	//get genres from user
+	System.out.print("Enter genre(s): "); //genre accepts null values
+	String genre = input.nextLine();
+	if(genre.isEmpty()) {
+		genre = null;
+	}
+	//get description from user
+	System.out.print("Enter movie description");
+	String description = input.nextLine();
+	if(description.isEmpty()) {
+		description = null;
+	}
+	
+	AnimeMovies movie = new AnimeMovies(title, date, duration, genre, description); //movie object
+	
+	DatabaseManager manager = new DatabaseManager();
+	manager.AddMovieToDatabase(movie);
+}
+
+public static void watchListMenu() {
+	System.out.println("*****Anime Tracker*****\n   Watch List Menu\n");
+	System.out.println("   1. Add to Watch List");
+	System.out.println("   2. Update Watch List");
+	System.out.println("   3. Remove from Watch List");
+	System.out.println("   4. List Watch List");
+	System.out.println("   5. Search Watch List");
+	System.out.println("   6. Reviews");
+	System.out.println("   7. Return to Main Menu");
+	System.out.println("enter a number to select");
+	System.out.println("***********************");
+	
+	Scanner input = new Scanner(System.in); //scanner object
+	
+	if(input.hasNextInt()) {
+	int choice =input.nextInt();
+	switch (choice) {
+		case 1:
+			System.out.println("...adding watch list");
+			break;
+		case 2:
+			System.out.println("...Updating watch list");
+			break;
+		case 3:
+			System.out.println("Remove watch list");
+			break;
+		case 4:
+			System.out.println("List watch list");
+			break;
+		case 5:
+			System.out.println("Search watch list");
+			break;
+		case 6:
+			System.out.println("will lead to the reviews menu....");
+		case 7:
+			displayMainMenu();
+			break;
+		default:
+	}
+} else {
+	System.out.println("Invalid choice. Please enter choice 1 - 6");
+	watchListMenu();
+}
+	input.close();
+}
+	
+}
