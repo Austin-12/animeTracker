@@ -1,0 +1,1 @@
+This application tracks anime series, movies, reviews, and a watch list. Users can add, update, remove, list, and search anime series, movies, reviews, and a watch list. Start the application by clicking the animeTracker.jar file. The following menu is shown when the application starts
