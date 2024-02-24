@@ -9,7 +9,7 @@ User-Friendly Interface: Easy-to-use command-line interface for seamless interac
 
 Installation
 1.Clone the repository
-2. run the following animeLibrary to create the database
+2. run the following animeLibrary to create the database. I used mariaDB under XAMPP
 
 Usage
 Upon running the application, you will be presented with the main menu, where you can choose various options such as managing anime series, anime movies, watch list, or exiting the application.
