@@ -8,7 +8,7 @@ Watch List: Add, update, remove, list, and search for items in the watch list.
 User-Friendly Interface: Easy-to-use command-line interface for seamless interaction.
 
 Installation
-1.Clone the repository
+1.Clone the repository or you could run the executible jar file
 2. run the following animeLibrary to create the database. I used mariaDB under XAMPP
 
 Usage
