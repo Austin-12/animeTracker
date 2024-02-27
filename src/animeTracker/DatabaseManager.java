@@ -331,9 +331,10 @@ public class DatabaseManager {
 				System.out.print("current title is " + currentTitle + ". " +"Enter new title or Enter key to skip: ");
 				//if user doesn't enter a new title use the same title.
 				String newTitle = input.nextLine();
+				String testTitle = newTitle; //testTitle that im gonna use to check it series user input exist
 				if(newTitle.isEmpty()) {
 					newTitle = title;
-				}
+				} 
 				
 				Date date = null; //the date going to the anime series constructor
 				int counter = 0; //counter to control loop
@@ -369,6 +370,7 @@ public class DatabaseManager {
 				System.out.print("current total episodes is " + (currentTotalEpisodes != 0 ? currentTotalEpisodes : "unknown") + ". " + "Enter new total episodes or enter key to skip: ");
 				String total = input.nextLine();
 				if(total.isEmpty()) {
+					newTotalEpisodes = currentTotalEpisodes; //use the same data as the new total of episodes
 					break;
 				}
 				try {
@@ -387,14 +389,14 @@ public class DatabaseManager {
 				System.out.print("current genre(s) " + (currentGenre != null ? currentGenre : "unknown") + ". " + "Enter new genre(s) or enter key to skip: ");
 				String newGenre = input.nextLine();
 				if(newGenre.length() == 0) {
-					newGenre = null;
+					newGenre = currentGenre;
 				}
 				
 				//prompt for new description
 				System.out.print("current description " + (currentDescription != null ? currentDescription : "unknown") + ". " +"Enter new description or enter key to skip: ");
 				String newDescription = input.nextLine();
 				if(newDescription.length() == 0) {
-					newDescription = null;
+					newDescription = currentDescription;
 				}
 				
 				//create sql and prepared statement
@@ -422,6 +424,36 @@ public class DatabaseManager {
 				preparedStatement0.setString(4, newGenre);
 				preparedStatement0.setString(5, newDescription);
 				preparedStatement0.setString(6, title);
+				}
+				
+				//create prepared statement to query the anime title to see if it already exist.
+				String checkSqlStatement = "SELECT  Title FROM animeseries WHERE Title = ?";
+				PreparedStatement checkPreparedStatement = null;
+				
+				try {
+					checkPreparedStatement = connection.prepareStatement(checkSqlStatement);
+				} catch (SQLException e) {
+					System.out.println("Error creating SELECT prepared statement");
+					e.printStackTrace();
+				}
+				//set parameter for prepared statement
+				try {
+					checkPreparedStatement.setString(1, testTitle);
+				} catch (SQLException e) {
+					System.out.println("Error setting values for SELECT prepared statement");
+					e.printStackTrace();
+				}
+				
+				//check if row is already in the database
+				try {
+					resultSet = checkPreparedStatement.executeQuery();
+					if(resultSet.next()) {
+						System.out.println("Title already exist must use a different title");
+						MainMenu.animeSeriesMenu(); //go back to anime series menu
+					}
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
 				
 				//check to see if anime series updated
