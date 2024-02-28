@@ -472,8 +472,93 @@ public class DatabaseManager {
 	}
 
 	public void AddMovieToDatabase(AnimeMovies movie) {
-		// TODO Auto-generated method stub
+		//establish connection to database
+				String url = "jdbc:mysql://localhost:3306/animelibrary";
+				String user = "root";
+				String password = "";
+				Connection connection = null; //connection object
+				ResultSet resultSet = null; //store result from query
+				
+				try {
+					connection = DriverManager.getConnection(url, user, password);
+					//System.out.println("successfully connected to database");
+				} catch (SQLException e) {
+					System.out.println("could not connect to database");
+					e.printStackTrace();
+				}
+				//create SQL and prepared statement 
+				String SqlStatement = new String("INSERT INTO animemovies(Title, ReleaseDate, Duration, Genre, Description) VALUES (?, ?, ?, ?, ?)");
+				PreparedStatement preparedStatement = null;
+				
+				try {
+					preparedStatement = connection.prepareStatement(SqlStatement);
+				} catch (SQLException e) {
+					System.out.println("Error creating INSERT prepared statement");
+					e.printStackTrace();
+				}
+				//set parameters for prepared statement
+				try {
+					if(movie.getDuration() == 0) {
+						preparedStatement.setString(1, movie.getTitle());
+						preparedStatement.setDate(2, movie.getReleaseDate());
+						preparedStatement.setNull(3, Types.NULL);
+						preparedStatement.setString(4, movie.getGenres());
+						preparedStatement.setString(5, movie.getDescription());
+					} else {
+					preparedStatement.setString(1, movie.getTitle());
+					preparedStatement.setDate(2, movie.getReleaseDate());
+					preparedStatement.setInt(3, movie.getDuration());
+					preparedStatement.setString(4, movie.getGenres());
+					preparedStatement.setString(5, movie.getDescription());
+					}
+				} catch (SQLException e) {
+					System.out.println("Error setting values for INSERT prepared statement");
+					e.printStackTrace();
+				}
+				
+				//create prepared statement to query the animie title to see if it already exist.
+				String checkSqlStatement = "SELECT  Title FROM animemovies WHERE Title = ?";
+				PreparedStatement checkPreparedStatement = null;
+				
+				try {
+					checkPreparedStatement = connection.prepareStatement(checkSqlStatement);
+				} catch (SQLException e) {
+					System.out.println("Error creating SELECT prepared statement");
+					e.printStackTrace();
+				}
+				//set parameter for prepared statement
+				try {
+					checkPreparedStatement.setString(1, movie.getTitle());
+				} catch (SQLException e) {
+					System.out.println("Error setting values for SELECT prepared statement");
+					e.printStackTrace();
+				}
+				
+				//check if row is already in the database
+				try {
+					resultSet = checkPreparedStatement.executeQuery();
+					if(resultSet.next()) {
+						System.out.println("row already exists and cannot be added again");
+						MainMenu.animeSeriesMenu(); //go back to anime series menu
+					}
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+				//execute statement
+				try {
+					int rowCount = preparedStatement.executeUpdate();
+					if(rowCount == 1) {
+						System.out.println("Anime movie added");
+						MainMenu.animeSeriesMenu(); //return to anime series menu
+					} else {
+						System.out.println("Error, anime movie was not added");
+					}
+				} catch (SQLException e) {
+					System.out.println("Error executeUpdate for prepared statement");
+					e.printStackTrace();
 		
 	}
-
+	}
 }

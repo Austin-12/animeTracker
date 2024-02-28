@@ -284,7 +284,7 @@ public static void addMovie() {
 		System.out.println("must provide movie title");
 		addMovie();
 	}
-	
+	//enter date
 	Date date = null; //the date going to the anime series constructor
 	int counter = 0; //counter to control loop
 	LocalDate thisYear = LocalDate.now(); //todays date
@@ -337,7 +337,7 @@ public static void addMovie() {
 		genre = null;
 	}
 	//get description from user
-	System.out.print("Enter movie description");
+	System.out.print("Enter movie description: ");
 	String description = input.nextLine();
 	if(description.isEmpty()) {
 		description = null;
