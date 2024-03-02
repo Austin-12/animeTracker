@@ -251,7 +251,7 @@ public static void animeMovieMenu() {
 			addMovie();
 			break;
 		case 2:
-			System.out.println("...Updating movie");
+			updateMovie();
 			break;
 		case 3:
 			System.out.println("Remove movie");
@@ -274,6 +274,21 @@ public static void animeMovieMenu() {
 	input.close();
 		
 	}
+
+public static void updateMovie() {
+	Scanner input = new Scanner(System.in);
+	System.out.print("Enter title of the movie you want to update: ");
+	String title = input.nextLine();
+	
+	if(title.length() == 0) { //if user doesn't enter title send back to the menu with error message
+		System.out.println("must enter title of movie");
+		animeMovieMenu();
+	}
+	DatabaseManager manager = new DatabaseManager();
+	manager.updateMovie(title);
+	input.close();
+	
+}
 
 public static void addMovie() {
 	Scanner input = new Scanner(System.in);

@@ -561,4 +561,9 @@ public class DatabaseManager {
 		
 	}
 	}
+
+	public void updateMovie(String title) {
+		
+	}
 }
+
