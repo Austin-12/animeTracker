@@ -11,14 +11,13 @@ import java.util.Scanner;
 
 public class DatabaseManager {
 	
-	//Method to add anime series to database
-	public void addToDatabase(AnimeSeries anime) {
+	//Method to connect to the animeLibrary database
+	public Connection connectToDatabase () {
 		//establish connection to database
 		String url = "jdbc:mysql://localhost:3306/animelibrary";
 		String user = "root";
 		String password = "";
 		Connection connection = null; //connection object
-		ResultSet resultSet = null; //store result from query
 		
 		try {
 			connection = DriverManager.getConnection(url, user, password);
@@ -27,16 +26,30 @@ public class DatabaseManager {
 			System.out.println("could not connect to database");
 			e.printStackTrace();
 		}
-		//create SQL and prepared statement 
-		String SqlStatement = new String("INSERT INTO animeseries(Title, ReleaseDate, TotalEpisodes, Genre, Description) VALUES (?, ?, ?, ?, ?)");
+		return connection;
+	}
+	//method to return a prepared statement takes the connection and the sql statement
+	public PreparedStatement returnStatement(Connection con, String sql) {
 		PreparedStatement preparedStatement = null;
+		String[] sqlArray = sql.split(" "); //split the sql statement into an array to get the first word
+		String statementType = sqlArray[0];
 		
 		try {
-			preparedStatement = connection.prepareStatement(SqlStatement);
+			preparedStatement = con.prepareStatement(sql);
 		} catch (SQLException e) {
-			System.out.println("Error creating INSERT prepared statement");
+			System.out.println("Error creating " + statementType + " statement");
 			e.printStackTrace();
 		}
+		return preparedStatement;
+	}
+	//method to add a anime series to the animeLibrary database
+	public void addToDatabase(AnimeSeries anime) {
+		ResultSet resultSet = null; //store result from query
+		Connection con = connectToDatabase(); //call method to connect to database
+		String SqlStatement = new String("INSERT INTO animeseries(Title, ReleaseDate, TotalEpisodes, Genre, Description) VALUES (?, ?, ?, ?, ?)"); 
+		PreparedStatement preparedStatement = returnStatement(con, SqlStatement); //call prepared statement method
+		
+	
 		//set parameters for prepared statement
 		try {
 			if(anime.getTotalEpisodes() == 0) {
@@ -59,14 +72,8 @@ public class DatabaseManager {
 		
 		//create prepared statement to query the animie title to see if it already exist.
 		String checkSqlStatement = "SELECT  Title FROM animeseries WHERE Title = ?";
-		PreparedStatement checkPreparedStatement = null;
+		PreparedStatement checkPreparedStatement = returnStatement(con, checkSqlStatement);
 		
-		try {
-			checkPreparedStatement = connection.prepareStatement(checkSqlStatement);
-		} catch (SQLException e) {
-			System.out.println("Error creating SELECT prepared statement");
-			e.printStackTrace();
-		}
 		//set parameter for prepared statement
 		try {
 			checkPreparedStatement.setString(1, anime.getTitle());
@@ -104,30 +111,12 @@ public class DatabaseManager {
 	
 	//method to list (all) anime series in database
 	public void List() {
-		//establish database connection
-		String url = "jdbc:mysql://localhost:3306/animelibrary";
-		String user = "root";
-		String password = "";
-		Connection connection = null; //connection object
+		Connection con = connectToDatabase();
 		ResultSet resultSet = null; //store result from query
 		
-		try {
-			connection = DriverManager.getConnection(url, user, password);
-			//System.out.println("successfully connected to database");
-		} catch (SQLException e) {
-			System.out.println("could not connect to database");
-			e.printStackTrace();
-		}
 		//create SQL and prepared statement 
 		String SqlStatement =  "SELECT Title, ReleaseDate, TotalEpisodes, Genre, Description FROM animeseries";
-		PreparedStatement preparedStatement = null;
-		
-		try {
-			preparedStatement = connection.prepareStatement(SqlStatement);
-		} catch (SQLException e) {
-			System.out.println("Error creating SELECT prepared statement");
-			e.printStackTrace();
-		}
+		PreparedStatement preparedStatement = returnStatement(con, SqlStatement);
 		
 		try {
 			resultSet = preparedStatement.executeQuery();
@@ -164,30 +153,11 @@ public class DatabaseManager {
 	}
 	//creates connection to the database and deletes the anime
 	public void deleteFromDatabase(String title) {
-		//establish database connection
-		String url = "jdbc:mysql://localhost:3306/animelibrary";
-		String user = "root";
-		String password = "";
-		Connection connection = null; //connection object
+		Connection con = connectToDatabase();
 		ResultSet resultSet = null; //store result from query
 		
-		try {
-			connection = DriverManager.getConnection(url, user, password);
-			//System.out.println("successfully connected to database");
-		} catch (SQLException e) {
-			System.out.println("could not connect to database");
-			e.printStackTrace();
-		}
-		
 		String deletesqlStatement = "DELETE FROM animeseries WHERE Title = ?";
-		PreparedStatement preparedsqlStatement = null;
-		
-		try {
-			preparedsqlStatement = connection.prepareStatement(deletesqlStatement);
-		} catch (SQLException e) {
-			System.out.println("Error creating DELETE prepared statement");
-			e.printStackTrace();
-		}
+		PreparedStatement preparedsqlStatement = returnStatement(con, deletesqlStatement);
 		
 		try {//set value in prepared statement
 			preparedsqlStatement.setString(1, title);
@@ -213,29 +183,12 @@ public class DatabaseManager {
 	//method to search and display a anime based on its title
 	public void searchAnimeSeries(String title) {
 		//establish database connection
-				String url = "jdbc:mysql://localhost:3306/animelibrary";
-				String user = "root";
-				String password = "";
-				Connection connection = null; //connection object
+				Connection con = connectToDatabase();
 				ResultSet resultSet = null; //store result from query
 				
-				try {
-					connection = DriverManager.getConnection(url, user, password);
-					//System.out.println("successfully connected to database");
-				} catch (SQLException e) {
-					System.out.println("could not connect to database");
-					e.printStackTrace();
-				}
-				
 				String sql = "SELECT Title, ReleaseDate, TotalEpisodes, Genre, Description FROM animeseries WHERE Title = ?";
-				PreparedStatement preparedStatement = null;
+				PreparedStatement preparedStatement = returnStatement(con, sql);
 				
-				try {
-					preparedStatement = connection.prepareStatement(sql);
-				} catch (SQLException e) {
-					System.out.println("Error creating SELECT prepared statement");
-					e.printStackTrace();
-				}
 				//set values
 				try {
 					preparedStatement.setString(1, title);
@@ -277,30 +230,14 @@ public class DatabaseManager {
 	//method to update anime series entry in database
 	public void updateAnimeSeries(String title) {
 		//establish connection to database
-		String url = "jdbc:mysql://localhost:3306/animelibrary";
-		String user = "root";
-		String password = "";
-		Connection connection = null; //connection object
+		Connection con = connectToDatabase();
 		ResultSet resultSet = null; //store result from query
 		
-		try {
-			connection = DriverManager.getConnection(url, user, password);
-			//System.out.println("successfully connected to database");
-		} catch (SQLException e) {
-			System.out.println("could not connect to database");
-			e.printStackTrace();
-		}
 		//create sql and prepared statement
 		String selectSql = "SELECT Title, ReleaseDate, TotalEpisodes, Genre, Description FROM animeseries WHERE Title = ?";
-		PreparedStatement preparedStatement = null;
+		PreparedStatement preparedStatement = returnStatement(con, selectSql);
 		
-		try {
-			preparedStatement = connection.prepareStatement(selectSql);
-		} catch (SQLException e) {
-			System.out.println("Error creating SELECT prepared statement");
-			e.printStackTrace();
-		}
-		//insert parameter value
+		//insert parameter values
 		try {
 			preparedStatement.setString(1, title);
 		} catch (SQLException e) {
@@ -401,14 +338,8 @@ public class DatabaseManager {
 				
 				//create sql and prepared statement
 				String updateSql = "UPDATE animeseries SET Title = ?, ReleaseDate = ?, TotalEpisodes = ?, Genre = ?, Description = ? WHERE Title = ?";
-				PreparedStatement preparedStatement0 = null;
+				PreparedStatement preparedStatement0 = returnStatement(con, updateSql);
 				
-				try {
-					preparedStatement0 = connection.prepareStatement(updateSql);
-				} catch (SQLException e) {
-					System.out.println("Error creating UPDATE prepared statement");
-					e.printStackTrace();
-				}
 				if(newTotalEpisodes == 0) {
 					preparedStatement0.setString(1, newTitle);
 					preparedStatement0.setDate(2, date);
@@ -428,14 +359,8 @@ public class DatabaseManager {
 				
 				//create prepared statement to query the anime title to see if it already exist.
 				String checkSqlStatement = "SELECT  Title FROM animeseries WHERE Title = ?";
-				PreparedStatement checkPreparedStatement = null;
+				PreparedStatement checkPreparedStatement = returnStatement(con,checkSqlStatement);
 				
-				try {
-					checkPreparedStatement = connection.prepareStatement(checkSqlStatement);
-				} catch (SQLException e) {
-					System.out.println("Error creating SELECT prepared statement");
-					e.printStackTrace();
-				}
 				//set parameter for prepared statement
 				try {
 					checkPreparedStatement.setString(1, testTitle);
@@ -473,29 +398,13 @@ public class DatabaseManager {
 
 	public void AddMovieToDatabase(AnimeMovies movie) {
 		//establish connection to database
-				String url = "jdbc:mysql://localhost:3306/animelibrary";
-				String user = "root";
-				String password = "";
-				Connection connection = null; //connection object
-				ResultSet resultSet = null; //store result from query
+		Connection con = connectToDatabase();
+		ResultSet resultSet = null; //store result from query
 				
-				try {
-					connection = DriverManager.getConnection(url, user, password);
-					//System.out.println("successfully connected to database");
-				} catch (SQLException e) {
-					System.out.println("could not connect to database");
-					e.printStackTrace();
-				}
-				//create SQL and prepared statement 
-				String SqlStatement = new String("INSERT INTO animemovies(Title, ReleaseDate, Duration, Genre, Description) VALUES (?, ?, ?, ?, ?)");
-				PreparedStatement preparedStatement = null;
-				
-				try {
-					preparedStatement = connection.prepareStatement(SqlStatement);
-				} catch (SQLException e) {
-					System.out.println("Error creating INSERT prepared statement");
-					e.printStackTrace();
-				}
+		//create SQL and prepared statement 
+		String SqlStatement = new String("INSERT INTO animemovies(Title, ReleaseDate, Duration, Genre, Description) VALUES (?, ?, ?, ?, ?)");
+		PreparedStatement preparedStatement = returnStatement(con, SqlStatement);
+			
 				//set parameters for prepared statement
 				try {
 					if(movie.getDuration() == 0) {
@@ -518,14 +427,8 @@ public class DatabaseManager {
 				
 				//create prepared statement to query the animie title to see if it already exist.
 				String checkSqlStatement = "SELECT  Title FROM animemovies WHERE Title = ?";
-				PreparedStatement checkPreparedStatement = null;
+				PreparedStatement checkPreparedStatement = returnStatement(con, checkSqlStatement);
 				
-				try {
-					checkPreparedStatement = connection.prepareStatement(checkSqlStatement);
-				} catch (SQLException e) {
-					System.out.println("Error creating SELECT prepared statement");
-					e.printStackTrace();
-				}
 				//set parameter for prepared statement
 				try {
 					checkPreparedStatement.setString(1, movie.getTitle());
@@ -551,7 +454,7 @@ public class DatabaseManager {
 					int rowCount = preparedStatement.executeUpdate();
 					if(rowCount == 1) {
 						System.out.println("Anime movie added");
-						MainMenu.animeSeriesMenu(); //return to anime series menu
+						MainMenu.animeMovieMenu(); //return to anime series menu
 					} else {
 						System.out.println("Error, anime movie was not added");
 					}
@@ -560,6 +463,7 @@ public class DatabaseManager {
 					e.printStackTrace();
 		
 	}
+				
 	}
 
 	public void updateMovie(String title) {
