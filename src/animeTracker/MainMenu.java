@@ -205,7 +205,8 @@ public static void removeAnimeSeries() {
 		removeAnimeSeries();
 	}
 	DatabaseManager manager = new DatabaseManager();
-	manager.deleteFromDatabase(title);
+	AnimeSeries anime = new AnimeSeries();  //dummy anime series object
+	manager.deleteFromDatabase(title, anime);
 	
 	input.close();
 	
@@ -254,7 +255,7 @@ public static void animeMovieMenu() {
 			updateMovie();
 			break;
 		case 3:
-			System.out.println("Remove movie");
+			removeMovie();
 			break;
 		case 4:
 			System.out.println("List movie");
@@ -274,6 +275,21 @@ public static void animeMovieMenu() {
 	input.close();
 		
 	}
+
+public static void removeMovie() {
+	Scanner input = new Scanner(System.in);
+	System.out.println("Enter title of the movie you want to remove: ");
+	String title = input.nextLine();
+	
+	if(title.length() == 0) {
+		System.out.println("must enter title of movie");
+		animeMovieMenu();
+	}
+	DatabaseManager manager = new DatabaseManager();
+	AnimeMovies movie = new AnimeMovies();
+	manager.deleteFromDatabase(title, movie);
+	
+}
 
 public static void updateMovie() {
 	Scanner input = new Scanner(System.in);

@@ -151,11 +151,13 @@ public class DatabaseManager {
 			e.printStackTrace();
 		}
 	}
-	//creates connection to the database and deletes the anime
-	public void deleteFromDatabase(String title) {
+	//method deletes movies and anime series from the database
+	public void deleteFromDatabase(String title, Object ob) {
 		Connection con = connectToDatabase();
 		ResultSet resultSet = null; //store result from query
 		
+		//if is a anime series object
+		if(ob instanceof AnimeSeries) {
 		String deletesqlStatement = "DELETE FROM animeseries WHERE Title = ?";
 		PreparedStatement preparedsqlStatement = returnStatement(con, deletesqlStatement);
 		
@@ -179,6 +181,32 @@ public class DatabaseManager {
 			System.out.println("Error executeUpdate for DELETE prepared statement");
 			e.printStackTrace();
 		}
+	} else if (ob instanceof AnimeMovies) {
+		
+		String deletesqlStatement = "DELETE FROM animemovies WHERE Title = ?";
+		PreparedStatement preparedsqlStatement = returnStatement(con, deletesqlStatement);
+		
+		try {//set value in prepared statement
+			preparedsqlStatement.setString(1, title);
+		} catch (SQLException e) {
+			System.out.println("Error setting value for DELETE prepared statement");
+			e.printStackTrace();
+		}
+		
+		try {
+			int rowCount = preparedsqlStatement.executeUpdate();
+			if(rowCount == 1) {
+				System.out.println("anime movie deleted");
+				MainMenu.displayMainMenu(); //go back to main menu
+			} else {
+				System.out.println("Anime movie does not exist");
+				MainMenu.animeMovieMenu(); // return to anime series menu
+			}
+		} catch (SQLException e) {
+			System.out.println("Error executeUpdate for DELETE prepared statement");
+			e.printStackTrace();
+		}
+	}
 	}
 	//method to search and display a anime based on its title
 	public void searchAnimeSeries(String title) {
@@ -442,7 +470,7 @@ public class DatabaseManager {
 					resultSet = checkPreparedStatement.executeQuery();
 					if(resultSet.next()) {
 						System.out.println("row already exists and cannot be added again");
-						MainMenu.animeSeriesMenu(); //go back to anime series menu
+						MainMenu.animeMovieMenu(); //go back to anime series menu
 					}
 				} catch (SQLException e) {
 					// TODO Auto-generated catch block

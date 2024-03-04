@@ -10,6 +10,8 @@ public class AnimeSeries extends AnimeEntity{
 		super(title, release_date, genres, description);
 		this.total_episodes = total_episodes;
 	}
+	public AnimeSeries() {
+	}
 	
 	//getters & setters
 	public int getTotalEpisodes() {

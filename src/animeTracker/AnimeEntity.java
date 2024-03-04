@@ -16,6 +16,8 @@ public class AnimeEntity { //class for common properties & methods
 		this.description = description;
 	}
 	
+	public AnimeEntity() {} //so i can make dummy objects 
+	
 	//getters & setters 
 	public String getTitle() {
 		return title;

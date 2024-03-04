@@ -10,6 +10,8 @@ public class AnimeMovies extends AnimeEntity {
 		this.duration = duration;
 	}
 	
+	public AnimeMovies() {}
+	
 	//getter & setters
 	public int getDuration() {
 		return duration;
