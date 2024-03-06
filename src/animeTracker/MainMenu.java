@@ -223,14 +223,16 @@ public static void searchAnimeSeries() {
 	}
 	
 	DatabaseManager manager = new DatabaseManager();
-	manager.searchAnimeSeries(title);
+	AnimeSeries anime = new AnimeSeries();
 	
+	manager.search(title, anime);
 	input.close();
 }
 
 public static void listAnimeSeries() {
 	DatabaseManager manager = new DatabaseManager();
-	manager.List();
+	AnimeSeries anime = new AnimeSeries();
+	manager.List(anime);
 }
 public static void animeMovieMenu() {
 	System.out.println("*****Anime Tracker*****\n   Anime Movie Menu\n");
@@ -258,10 +260,10 @@ public static void animeMovieMenu() {
 			removeMovie();
 			break;
 		case 4:
-			System.out.println("List movie");
+			listMovie();
 			break;
 		case 5:
-			System.out.println("Search movie");
+			searchMovie();
 			break;
 		case 6:
 			displayMainMenu();
@@ -275,6 +277,26 @@ public static void animeMovieMenu() {
 	input.close();
 		
 	}
+
+public static void searchMovie() {
+	Scanner input = new Scanner(System.in);
+	System.out.print("Enter the name of the movie to search: ");
+	String title = input.nextLine();
+	
+	if(title.length() == 0) {
+		System.out.println("must enter title of movie");
+	}
+	DatabaseManager manager = new DatabaseManager();
+	AnimeMovies movie = new AnimeMovies();
+	manager.search(title, movie);
+
+}
+
+public static void listMovie() {
+	DatabaseManager manager = new DatabaseManager();
+	AnimeMovies movie = new AnimeMovies();
+	manager.List(movie);
+}
 
 public static void removeMovie() {
 	Scanner input = new Scanner(System.in);

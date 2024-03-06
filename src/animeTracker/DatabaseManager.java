@@ -110,12 +110,31 @@ public class DatabaseManager {
 	}
 	
 	//method to list (all) anime series in database
-	public void List() {
+	public void List(Object ob) {
 		Connection con = connectToDatabase();
 		ResultSet resultSet = null; //store result from query
 		
-		//create SQL and prepared statement 
-		String SqlStatement =  "SELECT Title, ReleaseDate, TotalEpisodes, Genre, Description FROM animeseries";
+		String SqlStatement = "";
+		String errorMessage = "";
+		String menuOption = "";
+		int ep = 0;
+		String episodeMessage = "";
+		
+		//if list is passed an anime object
+		if(ob instanceof AnimeSeries) {
+			//create SQL and prepared statement 
+		SqlStatement =  "SELECT Title, ReleaseDate, TotalEpisodes, Genre, Description FROM animeseries";
+		errorMessage ="no anime series found";
+		menuOption = "animeSeries";
+		
+		//if list is passed a movie object
+		} else if(ob instanceof AnimeMovies) {
+			
+		SqlStatement = "SELECT Title, ReleaseDate, Duration, Genre, Description FROM animemovies";
+		errorMessage = "no movies found";
+		menuOption = "animeMovie";
+		}
+			
 		PreparedStatement preparedStatement = returnStatement(con, SqlStatement);
 		
 		try {
@@ -128,19 +147,32 @@ public class DatabaseManager {
 		//list everything in the anime series table
 		try {
 			if(!resultSet.next()) { //return to anime series menu if no anime series found
-				System.out.println("no anime series found");
-				MainMenu.animeSeriesMenu();
+				System.out.println(errorMessage);
+				switch(menuOption) {
+				case "animeSeries": MainMenu.animeSeriesMenu();
+				break;
+				case "animeMovie": MainMenu.animeMovieMenu();
+				break;
+				default: MainMenu.displayMainMenu();
+				}
 				
 				
 			} else {
 			do {
-						int ep = resultSet.getInt("TotalEpisodes");
+					//check which object get total episodes or total duration
+				if(ob instanceof AnimeSeries) {
+					ep = resultSet.getInt("TotalEpisodes");
+					episodeMessage = "Total Episodes: ";
+				} else if(ob instanceof AnimeMovies) {
+					ep = resultSet.getInt("Duration");
+					episodeMessage = "Duration: ";
+				}
 						String gen = resultSet.getString("Genre");
 						String des = resultSet.getString("Description");
 						Date da = resultSet.getDate("ReleaseDate");
 						
 						System.out.println("Title: " + resultSet.getString("Title")+ "\n" + "Release Date: " + (da != null ? da : "unknown") +
-						"\n" + "Total Episodes: " +  (ep != 0 ? ep : "unknown") + "\n" + "Genre(s): " + (gen != null ? gen : "unknown") + "\n" +
+						"\n" + episodeMessage +  (ep != 0 ? ep : "unknown") + "\n" + "Genre(s): " + (gen != null ? gen : "unknown") + "\n" +
 						"Description: " + (des != null ? des : "unknown"));
 						System.out.println("");
 			} while(resultSet.next());
@@ -150,7 +182,7 @@ public class DatabaseManager {
 			 System.out.println("Error printing out anime series");
 			e.printStackTrace();
 		}
-	}
+}
 	//method deletes movies and anime series from the database
 	public void deleteFromDatabase(String title, Object ob) {
 		Connection con = connectToDatabase();
@@ -209,12 +241,23 @@ public class DatabaseManager {
 	}
 	}
 	//method to search and display a anime based on its title
-	public void searchAnimeSeries(String title) {
+	public void search(String title, Object ob) {
 		//establish database connection
 				Connection con = connectToDatabase();
 				ResultSet resultSet = null; //store result from query
+				String sql = "";
+				String menuOption = "";
+				String episodeMessage = "";
+				int ep = 0;
 				
-				String sql = "SELECT Title, ReleaseDate, TotalEpisodes, Genre, Description FROM animeseries WHERE Title = ?";
+				if(ob instanceof AnimeSeries) {
+					sql = "SELECT Title, ReleaseDate, TotalEpisodes, Genre, Description FROM animeseries WHERE Title = ?";
+					menuOption = "animeSeries";
+					
+				} else if(ob instanceof AnimeMovies) {
+					sql = "SELECT Title, ReleaseDate, Duration, Genre, Description FROM animemovies WHERE Title = ?";
+					menuOption = "animeMovie";
+				}
 				PreparedStatement preparedStatement = returnStatement(con, sql);
 				
 				//set values
@@ -235,17 +278,31 @@ public class DatabaseManager {
 				try {
 					if(!resultSet.next()) {
 						System.out.println("No records found."); //if name isn't found
-						MainMenu.animeSeriesMenu(); //go back to series menu
+						switch(menuOption) {
+						case "animeSeries": MainMenu.animeSeriesMenu();
+						break;
+						case "animeMovie": MainMenu.animeMovieMenu();
+						break;
+						default: MainMenu.displayMainMenu();
+						break;
+						}
 					}
 					else {
-						int ep = resultSet.getInt("TotalEpisodes");
+						if(ob instanceof AnimeSeries) {
+							ep = resultSet.getInt("TotalEpisodes");
+							episodeMessage = "Total Episodes: ";
+							
+						} else if(ob instanceof AnimeMovies) {
+							ep = resultSet.getInt("Duration");
+							episodeMessage = "Duration: ";
+						}
 						String gen = resultSet.getString("Genre");
 						String des = resultSet.getString("Description");
 						Date da = resultSet.getDate("ReleaseDate");
 						
 					 //if record is found
 						System.out.println("Title: " + resultSet.getString("Title")+ "\n" + "Release Date: " + (da != null ? da : "unknown") +
-								"\n" + "Total Episodes: " + (ep != 0 ? ep : "unknown") + "\n" + "Genre(s): " + (gen != null ? gen : "unknown") + "\n" +
+								"\n" + episodeMessage + (ep != 0 ? ep : "unknown") + "\n" + "Genre(s): " + (gen != null ? gen : "unknown") + "\n" +
 								"Description: " + (des != null ? des : "unknown"));
 								System.out.println("");
 								MainMenu.displayMainMenu();
@@ -495,7 +552,7 @@ public class DatabaseManager {
 	}
 
 	public void updateMovie(String title) {
-		
+		//implement next
 	}
 }
 
