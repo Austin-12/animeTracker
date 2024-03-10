@@ -108,7 +108,9 @@ public static void updateAnimeSeries() {
 		animeSeriesMenu();
 	}
 	DatabaseManager manager = new DatabaseManager();
-	manager.updateAnimeSeries(title);
+	AnimeSeries anime = new AnimeSeries();
+	
+	manager.updateAnimeSeries(title, anime);
 	input.close();
 	}
 
@@ -323,7 +325,8 @@ public static void updateMovie() {
 		animeMovieMenu();
 	}
 	DatabaseManager manager = new DatabaseManager();
-	manager.updateMovie(title);
+	AnimeMovies movie = new AnimeMovies();
+	manager.updateAnimeSeries(title, movie);
 	input.close();
 	
 }

@@ -313,13 +313,23 @@ public class DatabaseManager {
 				}
 	}
 	//method to update anime series entry in database
-	public void updateAnimeSeries(String title) {
+	public void updateAnimeSeries(String title, Object ob) {
 		//establish connection to database
 		Connection con = connectToDatabase();
 		ResultSet resultSet = null; //store result from query
 		
+		String selectSql = "";
+		String menuOption = "";
+		//check the instance of the object
+		if(ob instanceof AnimeSeries) {
+			selectSql = "SELECT Title, ReleaseDate, TotalEpisodes, Genre, Description FROM animeseries WHERE Title = ?";
+			menuOption = "animeSeries";
+		} else if(ob instanceof AnimeMovies) {
+			selectSql = "SELECT Title, ReleaseDate, Duration, Genre, Description FROM animemovies WHERE Title = ?";
+			menuOption = "animeMovies";
+		}
 		//create sql and prepared statement
-		String selectSql = "SELECT Title, ReleaseDate, TotalEpisodes, Genre, Description FROM animeseries WHERE Title = ?";
+		
 		PreparedStatement preparedStatement = returnStatement(con, selectSql);
 		
 		//insert parameter values
@@ -340,12 +350,21 @@ public class DatabaseManager {
 		try {
 			if(!resultSet.next()) { //if anime doesn't exist
 				System.out.println("No records found");
-				MainMenu.animeSeriesMenu();
+				if(menuOption == "animeSeries") {
+					MainMenu.animeSeriesMenu();
+				} else if(menuOption == "animeMovies") {
+					MainMenu.animeMovieMenu();
+				}
 			} else {
+				int currentTotalEpisodes = 0;
+				if(ob instanceof AnimeSeries) {
+					currentTotalEpisodes = resultSet.getInt("TotalEpisodes");
+				} else if(ob instanceof AnimeMovies) {
+					currentTotalEpisodes = resultSet.getInt("Duration");
+				}
 				//record found
 				String currentTitle = resultSet.getString("Title");
 				Date currentDate = resultSet.getDate("ReleaseDate");
-				int currentTotalEpisodes = resultSet.getInt("TotalEpisodes");
 				String currentGenre = resultSet.getString("Genre");
 				String currentDescription = resultSet.getString("Description");
 				Scanner input = new Scanner(System.in); //do not close this input for some reason breaks code
@@ -384,12 +403,27 @@ public class DatabaseManager {
 					} 
 				
 				}
+				//check instance of object so i can decide if we are updating duration or total episodes
+				String episodePrompt = "";
+				String skipPrompt = "";
+				String errorMessage = "";
+				
+				if(ob instanceof AnimeSeries) {
+					episodePrompt = "current total episodes is ";
+					skipPrompt = "Enter new total episodes or enter key to skip: ";
+					errorMessage = "Invalid number of episodes please enter a number between 1 - 3000";
+					
+				} else if(ob instanceof AnimeMovies) {
+					episodePrompt = "current Duration is ";
+					skipPrompt = "Enter new Duration or enter key to skip: ";
+					errorMessage = "Invalid duration please enter a number between 1 - 300";
+				}
 				//prompt total episodes
 				
 				int newTotalEpisodes = 0;
 				int count = 0; //counter to control while loop
 				while(count == 0) {
-				System.out.print("current total episodes is " + (currentTotalEpisodes != 0 ? currentTotalEpisodes : "unknown") + ". " + "Enter new total episodes or enter key to skip: ");
+				System.out.print(episodePrompt + (currentTotalEpisodes != 0 ? currentTotalEpisodes : "unknown") + ". " + skipPrompt);
 				String total = input.nextLine();
 				if(total.isEmpty()) {
 					newTotalEpisodes = currentTotalEpisodes; //use the same data as the new total of episodes
@@ -400,7 +434,7 @@ public class DatabaseManager {
 					if(newTotalEpisodes > 0 && newTotalEpisodes <= 3000) {
 						count++;
 					} else {
-						System.out.println("Invalid number of episodes please enter a number between 1 - 3000");
+						System.out.println(errorMessage);
 					}
 				} catch (NumberFormatException e) {
 					System.out.print("Invalid input please enter a number\n");
@@ -422,7 +456,14 @@ public class DatabaseManager {
 				}
 				
 				//create sql and prepared statement
-				String updateSql = "UPDATE animeseries SET Title = ?, ReleaseDate = ?, TotalEpisodes = ?, Genre = ?, Description = ? WHERE Title = ?";
+				String updateSql = "";
+				
+				if(ob instanceof AnimeSeries) {
+					updateSql = "UPDATE animeseries SET Title = ?, ReleaseDate = ?, TotalEpisodes = ?, Genre = ?, Description = ? WHERE Title = ?";
+				} else if(ob instanceof AnimeMovies) {
+					updateSql = "UPDATE animemovies SET Title = ?, ReleaseDate = ?, Duration = ?, Genre = ?, Description = ? WHERE Title = ?";
+				}
+				
 				PreparedStatement preparedStatement0 = returnStatement(con, updateSql);
 				
 				if(newTotalEpisodes == 0) {
@@ -442,8 +483,14 @@ public class DatabaseManager {
 				preparedStatement0.setString(6, title);
 				}
 				
+				String checkSqlStatement = "";
 				//create prepared statement to query the anime title to see if it already exist.
-				String checkSqlStatement = "SELECT  Title FROM animeseries WHERE Title = ?";
+				if(ob instanceof AnimeSeries) {
+					checkSqlStatement = "SELECT  Title FROM animeseries WHERE Title = ?";
+					
+				} else if(ob instanceof AnimeMovies) {
+					checkSqlStatement = "SELECT Title FROM animemovies WHERE Title = ?";
+				}
 				PreparedStatement checkPreparedStatement = returnStatement(con,checkSqlStatement);
 				
 				//set parameter for prepared statement
@@ -465,14 +512,30 @@ public class DatabaseManager {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				
+				String updateMessage = "";
+				String updateError = "";
+				if(ob instanceof AnimeSeries) {
+					updateMessage = "anime series updated";
+					updateError = "error. anime series not updated";
+					
+				} else if(ob instanceof AnimeMovies) {
+					updateMessage = "anime movie updated";
+					updateError = "error. anime movie not updated";
+				}
 				//check to see if anime series updated
 				int update = preparedStatement0.executeUpdate();
 				if(update == 1) {
-					System.out.println("anime series updated");
-					MainMenu.animeSeriesMenu();
+					System.out.println(updateMessage);
+					
+					if(menuOption == "animeSeries") {
+						MainMenu.animeSeriesMenu();
+						
+					} else if(menuOption == "animeMovies") {
+						MainMenu.animeMovieMenu();
+					}
+					
 				} else {
-					System.out.println("Error. anime series NOT updated");
+					System.out.println(updateError);
 				}
 			}
 		} catch (SQLException e) {
@@ -549,10 +612,6 @@ public class DatabaseManager {
 		
 	}
 				
-	}
-
-	public void updateMovie(String title) {
-		//implement next
 	}
 }
 
