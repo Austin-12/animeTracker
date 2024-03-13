@@ -423,7 +423,7 @@ public static void watchListMenu() {
 	int choice =input.nextInt();
 	switch (choice) {
 		case 1:
-			System.out.println("...adding watch list");
+			addToWatchList();
 			break;
 		case 2:
 			System.out.println("...Updating watch list");
@@ -449,6 +449,48 @@ public static void watchListMenu() {
 	watchListMenu();
 }
 	input.close();
+}
+
+private static void addToWatchList() {
+	Scanner scanner = new Scanner(System.in);
+	int choice = 0; //stores the choice the user makes
+	
+	int counter = 0;
+	while(counter != 1) {
+	//prompt user to enter 1 to add anime series or 2 to add movie
+	System.out.print("Enter 1 to add anime series or 2 to add anime movie or press enter to return to the main menu: ");
+	String input = scanner.nextLine();
+	
+	//return to main menu if nothing is entered
+	if(input.isEmpty()) {
+		displayMainMenu();
+	}
+	
+//if choice is not empty try to convert to a int if can't print error
+	if(!input.isEmpty()) {
+		try {
+			choice = Integer.parseInt(input);
+		} catch (NumberFormatException e) {
+			System.out.println("error. input the number 1 or 2");
+			continue;
+		}
+		//choice is a int ensure it is either a 1 or 2 if not print error message
+		if(choice == 1 || choice == 2) {
+			counter++;
+		} else {
+			System.out.println("error. input the number 1 or 2");
+			continue;
+		}
+	}
+} //end of while loop
+	//if choice == 1 we are adding a anime series from our animeseries table to the watchlist
+	if(choice == 1) {
+		System.out.print("Enter title of anime series to add to watch list: ");
+		String title = scanner.nextLine();
+		
+		//once we have the title we have to check if the title exist in the anime series table.
+	}
+	
 }
 	
 }
