@@ -241,7 +241,7 @@ public static void animeMovieMenu() {
 	System.out.println("   1. Add Movie");
 	System.out.println("   2. Update Movie");
 	System.out.println("   3. Remove Movie");
-	System.out.println("   4. List Movie");
+	System.out.println("   4. List Movies");
 	System.out.println("   5. Search Movie");
 	System.out.println("   6. Return to Main Menu");
 	System.out.println("enter a number to select");
@@ -379,7 +379,7 @@ public static void addMovie() {
 		if(duration > 0 && duration <= 300) {
 			count++;
 		} else {
-			System.out.println("Invalid number of episodes please enter a number between 1 - 3000");
+			System.out.println("Invalid duration please enter a number between 1 - 3000");
 		}
 	} catch (NumberFormatException e) {
 		System.out.print("Invalid input please enter a number\n");
@@ -483,12 +483,89 @@ private static void addToWatchList() {
 		}
 	}
 } //end of while loop
-	//if choice == 1 we are adding a anime series from our animeseries table to the watchlist
+	//database manager to call methods 
+	DatabaseManager manager = new DatabaseManager();
+	//if choice == 1 we are adding a anime series from our animeseries table to the watchlist and 2 for movie
 	if(choice == 1) {
 		System.out.print("Enter title of anime series to add to watch list: ");
 		String title = scanner.nextLine();
 		
+		//create anime series object
+		AnimeSeries anime = new AnimeSeries();
 		//once we have the title we have to check if the title exist in the anime series table.
+		Boolean doesItExist = manager.doesItExist(title, anime);
+		//System.out.println(doesItExist);
+		
+		int episode = 0;
+		Boolean complete = false; //the data i need to get from the user
+		//if the title exist in the anime series table
+		if(doesItExist) {
+			System.out.println("Insert current episode, or f for finished: ");
+			
+			//if user puts in nothing print warning
+			if(!scanner.hasNext()) {
+				System.out.print("must enter current episode or f for finished.");
+				watchListMenu();
+			}
+			
+			if(scanner.hasNextInt()) {
+				episode = scanner.nextInt();
+			} else {
+				String input = scanner.nextLine();
+				if(input.equalsIgnoreCase("f")) {
+					complete = true;
+				} else {
+					System.out.println("Invalid input. pleae enter a number or f for finished");
+					watchListMenu();
+				}
+			}
+			
+			
+		} else { //anime series does not exist in anime series table
+			System.out.println("anime series does not exist, can't be added to watch list");
+			watchListMenu();
+			
+		}
+		//call method to add to the watchlist
+		manager.addToWatchList(title, episode, complete, anime);
+		
+	} else if(choice == 2) { //if user chooses movie to add to watchlist
+		System.out.print("Enter title of the anime movie to add to watch list: ");
+		String title = scanner.nextLine();
+		
+		//create anime movies
+		AnimeMovies movie = new AnimeMovies();
+		Boolean doesItExist = manager.doesItExist(title, movie);
+		
+		int episode = 0;
+		Boolean complete = false; //the data i need to get from the user
+		//if the title exist in the anime series table
+		if(doesItExist) {
+			System.out.println("Enter f for finished or n for not watched yet: ");
+			
+			//if user puts in nothing print warning
+			if(!scanner.hasNext()) {
+				System.out.print("must enter either f for finished or n for not watched yet.");
+				watchListMenu();
+			}
+			
+			
+				String input = scanner.nextLine();
+				if(input.equalsIgnoreCase("f")) {
+					complete = true;
+				} else if(input.equalsIgnoreCase("n")){
+					complete = false;
+				} else {
+					System.out.println("Invalid input. pleae enter a number or f for finished");
+					watchListMenu();
+				}
+				
+		} else { //anime series does not exist in anime series table
+			System.out.println("anime movie does not exist, can't be added to watch list");
+			watchListMenu();
+		}
+		//call method to add to the watchlist
+				manager.addToWatchList(title, episode, complete, movie);
 	}
 	
 }

@@ -613,5 +613,130 @@ public class DatabaseManager {
 	}
 				
 	}
+	
+	//method to check (by title and object) if the anime series or move exist in their respective table
+	public boolean doesItExist(String title, Object ob) {
+		ResultSet resultSet = null; //store result from query
+		String sqlStatement = "";
+		 
+		Connection con =connectToDatabase(); //connect to database
+		
+		if( ob instanceof AnimeSeries) {
+			sqlStatement = "SELECT Title FROM animeseries WHERE Title = ?";
+		} else if(ob instanceof AnimeMovies) {
+			
+			sqlStatement = "SELECT Title FROM animemovies WHERE Title = ?";
+		}
+		
+		PreparedStatement checkPreparedStatement = returnStatement(con, sqlStatement);
+		
+		//set parameter for prepared statement
+		try {
+			checkPreparedStatement.setString(1, title);
+		} catch (SQLException e) {
+			System.out.println("Error setting values for SELECT prepared statement");
+			e.printStackTrace();
+		}
+		
+		//check if row is already in the database
+		try {
+			resultSet = checkPreparedStatement.executeQuery();
+			if(resultSet.next()) {
+				//row does exist so return true
+				return true;
+			} else {
+				//return false if it doesn't exist
+				return false;
+			}
+		} catch (SQLException e) {
+			System.out.println("error executing sql statement");
+			e.printStackTrace();
+		}
+		return false;
+	}
+	public void addToWatchList(String title, int episode, boolean complete, Object ob) {
+		//get connection to database
+		Connection con = connectToDatabase();
+		ResultSet resultSet = null;
+		String sqlStatement = "";
+		String insertStatement = new String("INSERT INTO watchlist (SeriesID, MovieID, CurrentEpisode, Complete) VALUES (?, ?, ?, ?)");
+		/* 
+		 * get the seriesID/movieID from the anime series table and save it in a variable to add to watchlist
+		 * */
+		
+		//if object passed is a anime series
+		if(ob instanceof AnimeSeries) {
+			sqlStatement = "SELECT SeriesID FROM animeseries WHERE Title = ?";
+			
+		} else if(ob instanceof AnimeMovies) {
+			sqlStatement = "SELECT MovieID FROM animemovies WHERE Title = ?";
+		}
+		//make preparedstatment
+		PreparedStatement preparedStatement = returnStatement(con, sqlStatement);
+		
+		//set values
+		try {
+			preparedStatement.setString(1, title);
+		} catch (SQLException e) {
+			System.out.println("error setting values for SELECT prepared statement");
+			e.printStackTrace();
+		}
+		int seriesID = 0; //holds series id to add to the watchlist
+		//execute statement
+		try {
+			resultSet = preparedStatement.executeQuery();
+			if(resultSet.next()) {
+				if(ob instanceof AnimeSeries) {
+					seriesID = resultSet.getInt("SeriesID");
+					
+				} else if(ob instanceof AnimeMovies) {
+					seriesID = resultSet.getInt("MovieID");
+				}
+				
+			}
+		} catch (SQLException e) {
+			System.out.println("error executing statement");
+			e.printStackTrace();
+		}
+		
+		/*
+		 * add data to the watchlist 
+		 * */
+		PreparedStatement addPreparedStatement = returnStatement(con, insertStatement);
+		
+		//set values
+		try {
+			if(ob instanceof AnimeSeries) {
+				addPreparedStatement.setInt(1, seriesID);
+				addPreparedStatement.setNull(2, Types.NULL);
+				addPreparedStatement.setInt(3, episode);
+				
+			} else if(ob instanceof AnimeMovies) {
+				addPreparedStatement.setNull(1, Types.NULL);
+				addPreparedStatement.setInt(2, seriesID);
+				addPreparedStatement.setNull(3, Types.NULL);
+			}
+			if(complete == true) {
+				addPreparedStatement.setInt(4, 1);
+			} else {
+				addPreparedStatement.setInt(4, 0);
+			}
+		} catch (SQLException e) {
+			System.out.println("error setting values in add prepared statement");
+			e.printStackTrace();
+		}
+		//print message to let user know it was added successfully after executing
+		try {
+			int rowCount = addPreparedStatement.executeUpdate();
+			if(rowCount == 1) {
+				System.out.println(title + " was added to watch list");
+				MainMenu.watchListMenu();
+			}
+		} catch (SQLException e) {
+			System.out.println("error executing add prepared statement");
+			e.printStackTrace();
+		}
+	}
+	
 }
 
