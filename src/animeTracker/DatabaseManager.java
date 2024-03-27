@@ -698,6 +698,37 @@ public class DatabaseManager {
 			System.out.println("error executing statement");
 			e.printStackTrace();
 		}
+		/* check to see if the ID i grabbed out of the movie/series table is already in the watchl list if it is print error message
+		 * 
+		 * */
+		ResultSet resultSet2 = null;
+		String checkIDStatement = "";
+		if(ob instanceof AnimeSeries) {
+			 checkIDStatement = "SELECT SeriesID FROM watchlist WHERE SeriesID = ?";
+		} else if(ob instanceof AnimeMovies) {
+			checkIDStatement = "SELECT MovieID FROM watchlist WHERE MovieID = ?";
+		}
+		
+		PreparedStatement checkIDPreparedStatement = returnStatement(con,checkIDStatement);
+		
+		try {
+			checkIDPreparedStatement.setInt(1, seriesID);
+		} catch (SQLException e) {
+			System.out.println("error setting value in checkIDPreparedStatement");
+			e.printStackTrace();
+		}
+		//execute query
+		try {
+			resultSet2 = checkIDPreparedStatement.executeQuery();
+			String errorMessage = "";
+			if(resultSet2.next()) {
+				errorMessage = (ob instanceof AnimeSeries) ? "anime series already in watchlist cannot be added again" : "anime movie already in watchlist cannot be added again";
+				System.out.println(errorMessage);
+				MainMenu.watchListMenu();
+			}
+		} catch (SQLException e) {
+			System.out.println("error executing checkIDPreparedStatement");
+		}
 		
 		/*
 		 * add data to the watchlist 
@@ -725,6 +756,7 @@ public class DatabaseManager {
 			System.out.println("error setting values in add prepared statement");
 			e.printStackTrace();
 		}
+		
 		//print message to let user know it was added successfully after executing
 		try {
 			int rowCount = addPreparedStatement.executeUpdate();

@@ -429,7 +429,7 @@ public static void watchListMenu() {
 			System.out.println("...Updating watch list");
 			break;
 		case 3:
-			System.out.println("Remove watch list");
+			removeFromWatchlist();
 			break;
 		case 4:
 			System.out.println("List watch list");
@@ -450,8 +450,8 @@ public static void watchListMenu() {
 }
 	input.close();
 }
-
-private static void addToWatchList() {
+//method to return the choice a user makes (if they want to add/delete anime series/movie)
+private static int userChoice() {
 	Scanner scanner = new Scanner(System.in);
 	int choice = 0; //stores the choice the user makes
 	
@@ -463,7 +463,7 @@ private static void addToWatchList() {
 	
 	//return to main menu if nothing is entered
 	if(input.isEmpty()) {
-		displayMainMenu();
+		watchListMenu();
 	}
 	
 //if choice is not empty try to convert to a int if can't print error
@@ -483,6 +483,19 @@ private static void addToWatchList() {
 		}
 	}
 } //end of while loop
+	return choice;
+}
+
+//method to remove from watchlist
+private static void removeFromWatchlist() {
+	Scanner scanner = new Scanner(System.in);
+	
+}
+
+private static void addToWatchList() {
+	Scanner scanner = new Scanner(System.in);
+	
+	int choice = userChoice();
 	//database manager to call methods 
 	DatabaseManager manager = new DatabaseManager();
 	//if choice == 1 we are adding a anime series from our animeseries table to the watchlist and 2 for movie
@@ -494,7 +507,6 @@ private static void addToWatchList() {
 		AnimeSeries anime = new AnimeSeries();
 		//once we have the title we have to check if the title exist in the anime series table.
 		Boolean doesItExist = manager.doesItExist(title, anime);
-		//System.out.println(doesItExist);
 		
 		int episode = 0;
 		Boolean complete = false; //the data i need to get from the user
