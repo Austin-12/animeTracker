@@ -769,6 +769,77 @@ public class DatabaseManager {
 			e.printStackTrace();
 		}
 	}
+	public void deleteFromWatchList(String title, Object ob) {
+		Connection con = connectToDatabase();
+		ResultSet resultSet = null;
+		String selectStatement = "";
+		String deleteStatement = "";
+		
+		/* 
+		 * get the ID from the series/movie table and delete that ID in the watch list table
+		 * */
+		if(ob instanceof AnimeSeries) {
+			selectStatement = "SELECT SeriesID FROM animeseries WHERE Title = ?";
+			deleteStatement = "DELETE FROM watchlist WHERE SeriesID = ?";
+			
+		} else if(ob instanceof AnimeMovies) {
+			selectStatement = "SELECT MovieID FROM animemovies WHERE Title = ?";
+			deleteStatement = "DELETE FROM watchlist WHERE MovieID = ?";
+		}
+		
+		PreparedStatement preparedStatement = returnStatement(con, selectStatement);
+		
+		//set values
+		try {
+			preparedStatement.setString(1, title);
+		} catch (SQLException e) {
+			System.out.println("error setting value of select prepared statement");
+		}
+		
+		//get the id of the series/movie
+		int ID = 0;
+		//execute preparedstatement
+		try {
+			resultSet = preparedStatement.executeQuery();
+			
+			if(resultSet.next()) {
+			if(ob instanceof AnimeSeries) {
+				ID = resultSet.getInt("SeriesID");
+				
+			} else if(ob instanceof AnimeMovies) {
+				ID = resultSet.getInt("MovieID");
+			}
+			
+			}
+			
+		} catch (SQLException e) {
+			System.out.println("error executing prepared statement");
+		}
+		
+		//create delete prepared statement
+		PreparedStatement deletePreparedStatement = returnStatement(con, deleteStatement);
+		
+		//set values
+		try {
+			deletePreparedStatement.setInt(1, ID);
+		} catch (SQLException e) {
+			System.out.println("error setting value for delete prepared statement");
+		}
+		//execute statement
+		try {
+			int rowCount = deletePreparedStatement.executeUpdate();
+			if(rowCount == 1) {
+				System.out.println(title + " removed from watch list");
+				MainMenu.watchListMenu();
+			} else {
+				System.out.println( title + " doesn't exist in watch list");
+				MainMenu.watchListMenu();
+			}
+		} catch (SQLException e) {
+			System.out.println("error executing statement");
+			e.printStackTrace();
+		}
+	}
 	
 }
 

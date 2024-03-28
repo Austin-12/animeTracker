@@ -54,7 +54,7 @@ public class MainMenu {
 		System.out.println("*****Anime Tracker*****\n   Anime Series Menu\n");
 		System.out.println("   1. Add Anime Series");
 		System.out.println("   2. Update Anime Series");
-		System.out.println("   3. Remove anime Series");
+		System.out.println("   3. Delete anime Series");
 		System.out.println("   4. List Anime Series");
 		System.out.println("   5. Search Anime Series");
 		System.out.println("   6. Return to Main Menu");
@@ -240,7 +240,7 @@ public static void animeMovieMenu() {
 	System.out.println("*****Anime Tracker*****\n   Anime Movie Menu\n");
 	System.out.println("   1. Add Movie");
 	System.out.println("   2. Update Movie");
-	System.out.println("   3. Remove Movie");
+	System.out.println("   3. Delete Movie");
 	System.out.println("   4. List Movies");
 	System.out.println("   5. Search Movie");
 	System.out.println("   6. Return to Main Menu");
@@ -409,7 +409,7 @@ public static void watchListMenu() {
 	System.out.println("*****Anime Tracker*****\n   Watch List Menu\n");
 	System.out.println("   1. Add to Watch List");
 	System.out.println("   2. Update Watch List");
-	System.out.println("   3. Remove from Watch List");
+	System.out.println("   3. Delete from Watch List");
 	System.out.println("   4. List Watch List");
 	System.out.println("   5. Search Watch List");
 	System.out.println("   6. Reviews");
@@ -451,14 +451,19 @@ public static void watchListMenu() {
 	input.close();
 }
 //method to return the choice a user makes (if they want to add/delete anime series/movie)
-private static int userChoice() {
+private static int userChoice(Boolean adding) {
 	Scanner scanner = new Scanner(System.in);
 	int choice = 0; //stores the choice the user makes
 	
 	int counter = 0;
 	while(counter != 1) {
 	//prompt user to enter 1 to add anime series or 2 to add movie
-	System.out.print("Enter 1 to add anime series or 2 to add anime movie or press enter to return to the main menu: ");
+		if(adding) {
+			System.out.print("Enter 1 to add anime series or 2 to add anime movie to watch list or press enter to return to the main menu: ");
+		} else {
+			System.out.print("Enter 1 to delete anime series or 2 to delete anime movie to watch list or press enter to return to the main menu: ");
+		}
+	
 	String input = scanner.nextLine();
 	
 	//return to main menu if nothing is entered
@@ -490,12 +495,47 @@ private static int userChoice() {
 private static void removeFromWatchlist() {
 	Scanner scanner = new Scanner(System.in);
 	
+	int choice = userChoice(false);
+	DatabaseManager manager = new DatabaseManager();
+	
+	//if user wants to delete a anime series
+	if(choice == 1) {
+		System.out.print("Enter title of anime series to delete from watch list: ");
+		String title = scanner.nextLine();
+		AnimeSeries anime = new AnimeSeries();
+		
+		//check if it exist in the series/movie table
+		if(manager.doesItExist(title, anime)) {
+				
+		//call database manager method
+		manager.deleteFromWatchList(title, anime);
+		} else {
+			System.out.println("anime series does not exist");
+			watchListMenu();
+		}
+	} else if(choice == 2) {
+		
+		System.out.print("Enter title of anime movie to delete from watch list: ");
+		String title = scanner.nextLine();
+		AnimeMovies movie = new AnimeMovies();
+		
+		if(manager.doesItExist(title, movie)) {
+			
+		manager.deleteFromWatchList(title, movie);
+		} else {
+			System.out.println("anime movie does not exist");
+			watchListMenu();
+		}
+		
+	}
+	scanner.close();
+	
 }
 
 private static void addToWatchList() {
 	Scanner scanner = new Scanner(System.in);
 	
-	int choice = userChoice();
+	int choice = userChoice(true);
 	//database manager to call methods 
 	DatabaseManager manager = new DatabaseManager();
 	//if choice == 1 we are adding a anime series from our animeseries table to the watchlist and 2 for movie
