@@ -552,31 +552,26 @@ private static void addToWatchList() {
 		Boolean complete = false; //the data i need to get from the user
 		//if the title exist in the anime series table
 		if(doesItExist) {
-			System.out.println("Insert current episode, or f for finished: ");
-			
-			//if user puts in nothing print warning
-			if(!scanner.hasNext()) {
-				System.out.print("must enter current episode or f for finished.");
-				watchListMenu();
-			}
-			
-			if(scanner.hasNextInt()) {
-				episode = scanner.nextInt();
+			System.out.println("Insert current episode, or 'f' for finished: ");
+
+			String input = scanner.nextLine();// Read the input
+
+			// Check if the input is empty
+			if (input.isEmpty()) {
+			    System.out.println("Must enter current episode or 'f' for finished.");
+			    watchListMenu();
 			} else {
-				String input = scanner.nextLine();
-				if(input.equalsIgnoreCase("f")) {
-					complete = true;
-				} else {
-					System.out.println("Invalid input. pleae enter a number or f for finished");
-					watchListMenu();
-				}
+			    // Process the input
+			    if (input.equalsIgnoreCase("f")) {
+			        complete = true;
+			    } else if (input.matches("\\d+")) { // Check if input is a number
+			        episode = Integer.parseInt(input);
+			    } else {
+			        System.out.println("Invalid input. Please enter a number or 'f' for finished.");
+			        watchListMenu();
+			    }
 			}
-			
-			
-		} else { //anime series does not exist in anime series table
-			System.out.println("anime series does not exist, can't be added to watch list");
-			watchListMenu();
-			
+
 		}
 		//call method to add to the watchlist
 		manager.addToWatchList(title, episode, complete, anime);
@@ -593,22 +588,21 @@ private static void addToWatchList() {
 		Boolean complete = false; //the data i need to get from the user
 		//if the title exist in the anime series table
 		if(doesItExist) {
-			System.out.println("Enter f for finished or n for not watched yet: ");
+			System.out.print("Enter f for finished or n for not watched yet: ");
 			
 			//if user puts in nothing print warning
-			if(!scanner.hasNext()) {
-				System.out.print("must enter either f for finished or n for not watched yet.");
+			String input = scanner.nextLine();
+			if(input.isEmpty()) {
+				System.out.println("must enter either 'f' for finished or 'n' for not watched yet.");
 				watchListMenu();
 			}
-			
-			
-				String input = scanner.nextLine();
+		
 				if(input.equalsIgnoreCase("f")) {
 					complete = true;
 				} else if(input.equalsIgnoreCase("n")){
 					complete = false;
 				} else {
-					System.out.println("Invalid input. pleae enter a number or f for finished");
+					System.out.println("Invalid input. pleae enter 'f' for finished or 'n' for not watched yet");
 					watchListMenu();
 				}
 				
