@@ -840,6 +840,20 @@ public class DatabaseManager {
 			e.printStackTrace();
 		}
 	}
+	public void listWatchList() {
+		Connection con = connectToDatabase();
+		ResultSet resultSet = null;
+		String seriesSqlStatement = "SELECT animeseries.Title,"
+				+ "		watchlist.CurrentEpisode,"
+				+ "        watchlist.Complete,"
+				+ "        animeseries.Description"
+				+ "FROM"
+				+ "		watchlist"
+				+ "JOIN"
+				+ "		animeseries ON watchlist.SeriesID = animeseries.SeriesID";
+		
+		PreparedStatement preparedStatement = returnStatement(con, seriesSqlStatement);
+	}
 	
 }
 

@@ -432,7 +432,7 @@ public static void watchListMenu() {
 			removeFromWatchlist();
 			break;
 		case 4:
-			System.out.println("List watch list");
+			listWatchList();
 			break;
 		case 5:
 			System.out.println("Search watch list");
@@ -450,6 +450,18 @@ public static void watchListMenu() {
 }
 	input.close();
 }
+private static void listWatchList() {
+	/* list function should list:
+	 * title
+	 * current episode/complete
+	 * description
+	 * 
+	 * */
+	DatabaseManager manager = new DatabaseManager();
+	manager.listWatchList();
+	
+}
+
 //method to return the choice a user makes (if they want to add/delete anime series/movie)
 private static int userChoice(Boolean adding) {
 	Scanner scanner = new Scanner(System.in);
