@@ -842,18 +842,109 @@ public class DatabaseManager {
 	}
 	public void listWatchList() {
 		Connection con = connectToDatabase();
-		ResultSet resultSet = null;
-		String seriesSqlStatement = "SELECT animeseries.Title,"
-				+ "		watchlist.CurrentEpisode,"
-				+ "        watchlist.Complete,"
-				+ "        animeseries.Description"
-				+ "FROM"
-				+ "		watchlist"
-				+ "JOIN"
-				+ "		animeseries ON watchlist.SeriesID = animeseries.SeriesID";
+		ResultSet seriesResultSet = null;
+		ResultSet moviesResultSet = null;
 		
-		PreparedStatement preparedStatement = returnStatement(con, seriesSqlStatement);
+		String seriesSqlStatement = "SELECT animeseries.Title, "
+		        + "watchlist.CurrentEpisode, "
+		        + "watchlist.Complete, "
+		        + "animeseries.Description "
+		        + "FROM watchlist "
+		        + "JOIN animeseries ON watchlist.SeriesID = animeseries.SeriesID";
+
+		
+		String moviesSqlStatement = "SELECT animemovies.Title, watchlist.Complete, animemovies.Description "
+		        + "FROM watchlist "
+		        + "JOIN animemovies ON watchlist.MovieID = animemovies.MovieID";
+
+		
+		//make prepared statements
+		PreparedStatement seriesPreparedStatement = returnStatement(con, seriesSqlStatement);
+		PreparedStatement moviesPreparedStatement = returnStatement(con, moviesSqlStatement);
+		
+		//execute series prepared statement
+		try {
+			seriesResultSet = seriesPreparedStatement.executeQuery();
+		} catch (SQLException e) {
+			System.out.println("error executintg series PreparedStatement");
+			e.printStackTrace();
+		}
+		
+		//execute moviesPrepared Statement
+		try {
+			moviesResultSet = moviesPreparedStatement.executeQuery();
+		} catch (SQLException e) {
+			System.out.println("error executing movie series perpared statement");
+			e.printStackTrace();
+		}
+		
+		try {
+			boolean hasSeries = seriesResultSet.next();
+			boolean hasMovies = moviesResultSet.next();
+			if(hasSeries && !hasMovies) { //if watchlist has series and no movies
+				System.out.println("***Anime Series***");
+				watchListHelper(seriesResultSet, 1); //call method to print the series information
+				
+			} else if(hasMovies && !hasSeries) { //if watchl list has movies and no series
+				System.out.println("***Anime Movies***");
+				watchListHelper(moviesResultSet, 2); //call method to print the movies information 
+				
+			} else if(hasSeries && hasMovies) { //if watchlist has both series and movies
+				System.out.println("***Anime Series***");
+				watchListHelper(seriesResultSet, 1);
+				
+				System.out.println("***Anime Movies***");
+				watchListHelper(moviesResultSet, 2);
+			} else {
+				//no records found
+				System.out.println("No records found");
+			}
+		} catch (SQLException e) {
+			System.out.println("Error cannot execute resultsets for watch list");
+			e.printStackTrace();
+		}
+		
+	}
+	//helper method to list watchlist passed in the executed statement to print the values
+	public void watchListHelper(ResultSet resultSet, int choice) {
+		/* choice 1 is just anime series 
+		 * choice 2 is just movies
+		 * 
+		 * */
+		if(choice == 1) {
+		try {
+			do {
+				String title = resultSet.getString("Title");
+				int currentEpisode = resultSet.getInt("CurrentEpisode");
+				int complete = resultSet.getInt("Complete");
+				String description = resultSet.getString("Description");
+				
+				System.out.println("Title: " + title + "\n" + (complete == 0 ? "Progress: Still Watching\n"+ "Current Episode: " + currentEpisode : "Progress: Complete" ));
+				 System.out.println("Description: "  + description);
+				 System.out.print("\n");
+			} while(resultSet.next());
+		} catch (SQLException e) {
+			System.out.println("error in watchlist helper");
+			e.printStackTrace();
+		}
+		} else if(choice == 2) {
+			try {
+				do {
+					String title = resultSet.getString("Title");
+					int complete = resultSet.getInt("Complete");
+					String description = resultSet.getString("Description");
+					
+					System.out.println("Title: " + title + "\n" + (complete == 0 ? "Progress: Still Watching" : "Progress: Complete" ));
+					 System.out.println("Description: "  + description);
+					 System.out.print("\n");
+				} while(resultSet.next());
+			} catch (SQLException e) {
+				System.out.println("error movie result set");
+				e.printStackTrace();
+			}  }
+		}
+		
+		
 	}
 	
-}
 
