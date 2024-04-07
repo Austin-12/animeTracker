@@ -903,6 +903,7 @@ public class DatabaseManager {
 			System.out.println("Error cannot execute resultsets for watch list");
 			e.printStackTrace();
 		}
+		MainMenu.watchListMenu();
 		
 	}
 	//helper method to list watchlist passed in the executed statement to print the values
@@ -943,6 +944,64 @@ public class DatabaseManager {
 				e.printStackTrace();
 			}  }
 		}
+	public void searchWatchList(String title, Object ob) {
+		Connection con = connectToDatabase();
+		ResultSet resultSet = null;
+		String sqlStatement = "";
+		
+		if (ob instanceof AnimeSeries) {
+		    sqlStatement = "SELECT animeseries.Title, "
+		            + "watchlist.CurrentEpisode, "
+		            + "watchlist.Complete, "
+		            + "animeseries.Description "
+		            + "FROM watchlist "
+		            + "JOIN animeseries ON watchlist.SeriesID = animeseries.SeriesID "
+		            + "WHERE animeseries.Title = ?";
+		} else if (ob instanceof AnimeMovies) {
+		    sqlStatement = "SELECT animemovies.Title, "
+		            + "watchlist.Complete, "
+		            + "animemovies.Description "
+		            + "FROM watchlist "
+		            + "JOIN animemovies ON watchlist.MovieID = animemovies.MovieID "
+		            + "WHERE animemovies.Title = ?";
+		}
+
+		PreparedStatement preparedStatement = returnStatement(con,sqlStatement);
+		
+		//set values
+		try {
+			preparedStatement.setString(1, title);
+		} catch (SQLException e) {
+			System.out.println("Error setting values in searchWatchList");
+			e.printStackTrace();
+		}
+		
+		try {
+			resultSet = preparedStatement.executeQuery();
+			/* if there are elements in result set and its a series call helper method to print out the values
+			 * same with movies, if neither record doesn't exist
+			 * */
+			if(ob instanceof AnimeSeries) {
+				if(resultSet.next()) {
+					watchListHelper(resultSet, 1);
+				} else {
+					System.out.println("No Record Found");
+				}
+			}
+			
+			if(ob instanceof AnimeMovies) {
+				if(resultSet.next()) {
+					watchListHelper(resultSet, 2);
+				} else {
+					System.out.println("No Record Found");
+				}
+			}
+		} catch (SQLException e) {
+			System.out.println("Error executing query in search watch list");
+			e.printStackTrace();
+		}
+		
+	}
 		
 		
 	}

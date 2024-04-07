@@ -435,7 +435,7 @@ public static void watchListMenu() {
 			listWatchList();
 			break;
 		case 5:
-			System.out.println("Search watch list");
+			searchWatchList();
 			break;
 		case 6:
 			System.out.println("will lead to the reviews menu....");
@@ -450,6 +450,33 @@ public static void watchListMenu() {
 }
 	input.close();
 }
+private static void searchWatchList() {
+	Scanner scanner = new Scanner(System.in);
+	System.out.print("Enter Title to search Watch List: ");
+	
+	String title = scanner.nextLine();
+
+	DatabaseManager manager = new DatabaseManager();
+
+	AnimeSeries anime = new AnimeSeries();
+	AnimeMovies movie = new AnimeMovies();
+	
+	Boolean checkSeries = manager.doesItExist(title, anime);
+	Boolean checkMovies = manager.doesItExist(title, movie);
+	/* see if the title exist in the series/movie table if it does call the search watch list in manager if it doesn't
+	 * "record not found"
+	 * */
+	if(checkSeries) {
+		manager.searchWatchList(title, anime);
+		
+	} else if(checkMovies) {
+		manager.searchWatchList(title, movie);
+		
+	} else {
+		System.out.println("No Records Found");
+	}
+}
+
 private static void listWatchList() {
 	/* list function should list:
 	 * title
