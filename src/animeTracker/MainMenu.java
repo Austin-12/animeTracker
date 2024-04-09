@@ -426,7 +426,7 @@ public static void watchListMenu() {
 			addToWatchList();
 			break;
 		case 2:
-			System.out.println("...Updating watch list");
+			updateWatchList();
 			break;
 		case 3:
 			removeFromWatchlist();
@@ -438,7 +438,8 @@ public static void watchListMenu() {
 			searchWatchList();
 			break;
 		case 6:
-			System.out.println("will lead to the reviews menu....");
+			reviewsMenu();
+			break;
 		case 7:
 			displayMainMenu();
 			break;
@@ -450,6 +451,33 @@ public static void watchListMenu() {
 }
 	input.close();
 }
+
+//menu to add, update, delete, list, search anime reviews
+private static void reviewsMenu() {
+	System.out.println("*****Anime Tracker*****\n   Anime Review Menu\n");
+	System.out.println("   1. Add Review");
+	System.out.println("   2. Update Review");
+	System.out.println("   3. Delete Review");
+	System.out.println("   4. List Reviews");
+	System.out.println("   5. Search Review");
+	System.out.println("   6. Return to Main Menu");
+	System.out.println("enter a number to select");
+	System.out.println("***********************");
+	
+}
+//method to update watch list object based on title of the series/movie
+private static void updateWatchList() {
+	Scanner scanner = new Scanner(System.in);
+	DatabaseManager manager = new DatabaseManager();
+	
+	System.out.println("Enter title to update Anime in the Watch List");
+	String title = scanner.nextLine();
+	
+	//check if anime exist in the series/movie table first
+
+	
+}
+
 private static void searchWatchList() {
 	Scanner scanner = new Scanner(System.in);
 	System.out.print("Enter Title to search Watch List: ");
@@ -591,7 +619,7 @@ private static void addToWatchList() {
 		Boolean complete = false; //the data i need to get from the user
 		//if the title exist in the anime series table
 		if(doesItExist) {
-			System.out.println("Insert current episode, or 'f' for finished: ");
+			System.out.print("Insert current episode, or 'f' for finished: ");
 
 			String input = scanner.nextLine();// Read the input
 
