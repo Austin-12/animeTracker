@@ -1000,7 +1000,7 @@ public class DatabaseManager {
 			System.out.println("Error executing query in search watch list");
 			e.printStackTrace();
 		}
-		
+		MainMenu.watchListMenu();
 	}
 	public void updateWatchList(String title, Object ob) {
 		Connection con = connectToDatabase();
@@ -1082,7 +1082,8 @@ public class DatabaseManager {
 			//if series display the current episode
 			
 			//if episode is 0 that means the current series has been watched
-			System.out.println(currentEpisode == 0?"Current progress: Complete Enter new episode, 'f' for finished, or enter to skip":("Current episode: "  + currentEpisode+".") + " Enter new episode, 'f' for finished, or enter to skip");
+			System.out.print(currentEpisode == 0?"Current progress: [Complete] Enter new episode, 'f' for finished, or enter to skip: ":("Current episode: "  + currentEpisode+".") + 
+					" Enter new episode, 'f' for finished, or enter to skip: ");
 			String input = scanner.nextLine();
 			
 			if(input.isEmpty()) {
@@ -1097,14 +1098,68 @@ public class DatabaseManager {
 					currentEpisode = Integer.parseInt(input);
 					complete = 0;
 				} else {
-					System.out.println("Invalid input. Enter new episode, 'f' for finished, or enter to skip");
+					System.out.print("Invalid input. Enter new episode, 'f' for finished, or enter to skip");
 					MainMenu.watchListMenu();
 				}
+				updateSqlStatement = "UPDATE watchlist SET CurrentEpisode = ?, Complete = ? WHERE SeriesID = ?";
 			}
 		} else if(ob instanceof AnimeMovies) {
-			System.out.print("Current progress: " + (complete == 0 ? "Still Watching" : "Complete") + " Enter f for finished or n for not watched yet: ");
+			System.out.print("Current progress: " + (complete == 0 ? "Still Watching" : "Complete") + " Enter 'f' for finished or 'n' for not watched yet or enter to skip: ");
+			String input = scanner.nextLine();
+			if(input.isEmpty()) {
+				MainMenu.watchListMenu();
+				
+			} else {
+				
+				if(input.equalsIgnoreCase("f")) {
+					complete = 1;
+					
+				} else if(input.equalsIgnoreCase("n")) {
+					complete = 0;
+					
+				} else {
+					System.out.println("Invalid input.  Enter 'f' for finished or 'n' for not watched yet or enter to skip: ");
+					MainMenu.watchListMenu();
+				}
+				updateSqlStatement = "UPDATE watchlist SET Complete = ? WHERE MovieID = ?";
+			}
 		}
-
+		PreparedStatement updatePreparedStatement = returnStatement(con, updateSqlStatement);
+		//set new values in the database based on object type
+		if(ob instanceof AnimeSeries) {
+			try {
+				updatePreparedStatement.setInt(1, currentEpisode);
+				updatePreparedStatement.setInt(2, complete);
+				updatePreparedStatement.setInt(3, ID);
+			} catch (SQLException e) {
+				System.out.println("error setting values in updateprepared statement");
+				e.printStackTrace();
+			}
+			
+		} else if(ob instanceof AnimeMovies) {
+			try {
+				updatePreparedStatement.setInt(1, complete);
+				updatePreparedStatement.setInt(2, ID);
+			} catch (SQLException e) {
+				System.out.println("error setting values in update prepared statement");
+				e.printStackTrace();
+			}
+		}
+		//execute statement
+		try {
+			int update = updatePreparedStatement.executeUpdate();
+			if(update == 1) {
+				System.out.println(title + " updated");
+				MainMenu.watchListMenu();
+			} else {
+				System.out.println("error could not update " + title);
+				MainMenu.watchListMenu();
+			}
+		} catch (SQLException e) {
+			System.out.println("error executing update prepared statement");
+			e.printStackTrace();
+		}
+		
 	}
 		
 		
