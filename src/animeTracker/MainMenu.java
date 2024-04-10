@@ -467,13 +467,34 @@ private static void reviewsMenu() {
 }
 //method to update watch list object based on title of the series/movie
 private static void updateWatchList() {
+	/* user enters title that he wants to update
+	 *make sure the title exist in the series/movie table
+	 *if it does check if the corresponding series/movie ID is in the watch list
+	 *select current episode and complete and update if you wish
+	 * */
 	Scanner scanner = new Scanner(System.in);
 	DatabaseManager manager = new DatabaseManager();
 	
-	System.out.println("Enter title to update Anime in the Watch List");
+	System.out.print("Enter title to update Anime in the Watch List: ");
 	String title = scanner.nextLine();
 	
 	//check if anime exist in the series/movie table first
+	AnimeSeries anime = new AnimeSeries();
+	AnimeMovies movie = new AnimeMovies();
+	
+	Boolean checkSeries = manager.doesItExist(title, anime);
+	Boolean checkMovies = manager.doesItExist(title, movie);
+	
+	if(checkSeries) {
+		manager.updateWatchList(title, anime);
+		
+	} else if(checkMovies) {
+		manager.updateWatchList(title, movie);
+		
+	} else {
+		System.out.println("Record not found");
+		watchListMenu();
+	}
 
 	
 }

@@ -1002,6 +1002,110 @@ public class DatabaseManager {
 		}
 		
 	}
+	public void updateWatchList(String title, Object ob) {
+		Connection con = connectToDatabase();
+		ResultSet resultSet = null;
+		ResultSet resultSetWatchList = null;
+		String selectStatement = "";
+		String selectStatementWatchList = "";
+		
+		if(ob instanceof AnimeSeries) {
+			selectStatement = "SELECT SeriesID FROM animeseries WHERE Title = ?";
+			selectStatementWatchList = "SELECT currentEpisode, Complete FROM watchlist WHERE SeriesID = ?";
+			
+		} else if(ob instanceof AnimeMovies) {
+			selectStatement = "SELECT MovieID FROM animemovies WHERE Title = ?";
+			selectStatementWatchList = "SELECT Complete FROM watchlist WHERE MovieID = ?";
+		}
+		
+		PreparedStatement preparedStatement = returnStatement(con, selectStatement);
+		PreparedStatement preparedStatementWatchList = returnStatement(con, selectStatementWatchList);
+		
+		//set values
+		try {
+			preparedStatement.setString(1, title);
+		} catch (SQLException e) {
+			System.out.println("error setting values in updateWatchList");
+			e.printStackTrace();
+		}
+		
+		int ID = 0;
+		//execute statement
+		try {
+			resultSet = preparedStatement.executeQuery();
+			if(resultSet.next()) {
+				
+				if(ob instanceof AnimeSeries) {
+					ID = resultSet.getInt("SeriesID");
+					
+				} else if(ob instanceof AnimeMovies) {
+					ID = resultSet.getInt("MovieID");
+				}
+			}
+		} catch (SQLException e) {
+			System.out.println("error executing statement in update Watch List");
+			e.printStackTrace();
+		}
+		
+		//set values in the watch list prepared statement
+		try {
+			preparedStatementWatchList.setInt(1, ID);
+		} catch (SQLException e) {
+			System.out.println("error setting value in update watch list prepared statement");
+			e.printStackTrace();
+		}
+		
+		int currentEpisode = 0;
+		int complete = 0;
+		//execute statement get the current episode number and if you are complete with the anime or not
+		try {
+			resultSetWatchList = preparedStatementWatchList.executeQuery();
+			//if the anime is found in the watch list
+			if(resultSetWatchList.next()) {
+				//only anime series has current episode
+				if(ob instanceof AnimeSeries) {
+				currentEpisode = resultSetWatchList.getInt("CurrentEpisode");
+				}
+				complete = resultSetWatchList.getInt("Complete");
+			} else {
+				System.out.println("Record not found");
+				MainMenu.watchListMenu();
+			}
+		} catch (SQLException e) {
+			System.out.println("error executing watch list prepared statement");
+			e.printStackTrace();
+		}
+		
+		Scanner scanner = new Scanner(System.in); //scanner object
+		String updateSqlStatement = "";
+		if(ob instanceof AnimeSeries) {
+			//if series display the current episode
+			
+			//if episode is 0 that means the current series has been watched
+			System.out.println(currentEpisode == 0?"Current progress: Complete Enter new episode, 'f' for finished, or enter to skip":("Current episode: "  + currentEpisode+".") + " Enter new episode, 'f' for finished, or enter to skip");
+			String input = scanner.nextLine();
+			
+			if(input.isEmpty()) {
+				//go back to menu
+				MainMenu.watchListMenu();
+			} else {
+				
+				if(input.equalsIgnoreCase("f")) { //if series is not finished then episode is 0 and complete is 1 for true
+					currentEpisode = 0;
+					complete = 1;
+				} else if(input.matches("\\d+")){ //if input is a number
+					currentEpisode = Integer.parseInt(input);
+					complete = 0;
+				} else {
+					System.out.println("Invalid input. Enter new episode, 'f' for finished, or enter to skip");
+					MainMenu.watchListMenu();
+				}
+			}
+		} else if(ob instanceof AnimeMovies) {
+			System.out.print("Current progress: " + (complete == 0 ? "Still Watching" : "Complete") + " Enter f for finished or n for not watched yet: ");
+		}
+
+	}
 		
 		
 	}
