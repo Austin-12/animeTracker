@@ -302,7 +302,7 @@ public static void listMovie() {
 
 public static void removeMovie() {
 	Scanner input = new Scanner(System.in);
-	System.out.println("Enter title of the movie you want to remove: ");
+	System.out.print("Enter title of the movie you want to remove: ");
 	String title = input.nextLine();
 	
 	if(title.length() == 0) {
@@ -464,7 +464,89 @@ private static void reviewsMenu() {
 	System.out.println("enter a number to select");
 	System.out.println("***********************");
 	
+Scanner input = new Scanner(System.in); //scanner object
+	
+	if(input.hasNextInt()) {
+	int choice =input.nextInt();
+	switch (choice) {
+		case 1:
+			addReview();
+			break;
+		case 2:
+			updateReview();
+			break;
+		case 3:
+			removeReview();
+			break;
+		case 4:
+			listReview();
+			break;
+		case 5:
+			searchReview();
+			break;
+		case 6:
+			displayMainMenu();
+			break;
+		default:
+	}
+} else {
+	System.out.println("Invalid choice. Please enter choice 1 - 6");
+	reviewsMenu();
 }
+	input.close();
+}
+
+
+private static void searchReview() {
+	// TODO Auto-generated method stub
+	
+}
+
+private static void listReview() {
+	// TODO Auto-generated method stub
+	
+}
+
+private static void removeReview() {
+	// TODO Auto-generated method stub
+	
+}
+
+private static void updateReview() {
+	// TODO Auto-generated method stub
+	
+}
+
+private static void addReview() {
+	Scanner scanner = new Scanner(System.in);
+	
+	System.out.print("Enter Anime Title To Add Review: ");
+	String title = scanner.nextLine();
+	AnimeSeries anime = new AnimeSeries();
+	AnimeMovies movie = new AnimeMovies();
+	DatabaseManager manager = new DatabaseManager();
+	
+	//first see if anime exist at all in the database
+	Boolean checkSeries = manager.doesItExist(title, anime);
+	Boolean checkMovies = manager.doesItExist(title, movie);
+	
+	if(checkSeries) {
+	//check if the series is in the watchlist 
+		manager.doesItExistInWatchList(title, anime);
+	} else if(checkMovies) {
+		//check if the movie is in the watch list
+		manager.doesItExistInWatchList(title, movie);
+	} else {
+		System.out.println("anime does not exist"); //anime doesn't exist in the database
+	}
+	/* call a method that takes the title the user inputs
+	 * gets the seriesID/movieID sees if it exist in the watchlist
+	 * if it does the user can add a review for that anime if doesn't 
+	 * print error cannot leave a review for anime not on watch list
+	 * */
+	
+}
+
 //method to update watch list object based on title of the series/movie
 private static void updateWatchList() {
 	/* user enters title that he wants to update

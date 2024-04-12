@@ -12,12 +12,12 @@ import java.util.Scanner;
 public class DatabaseManager {
 	
 	//Method to connect to the animeLibrary database
-	public Connection connectToDatabase () {
+public Connection connectToDatabase () {
 		//establish connection to database
 		String url = "jdbc:mysql://localhost:3306/animelibrary";
 		String user = "root";
 		String password = "";
-		Connection connection = null; //connection object
+		Connection connection = null; //connection object	
 		
 		try {
 			connection = DriverManager.getConnection(url, user, password);
@@ -1161,7 +1161,10 @@ public class DatabaseManager {
 		}
 		
 	}
+	public void doesItExistInWatchList(String title, Object ob) {
+		Connection con = connectToDatabase();
 		
+	}
 		
 	}
 	
