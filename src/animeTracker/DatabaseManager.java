@@ -1098,7 +1098,7 @@ public Connection connectToDatabase () {
 					currentEpisode = Integer.parseInt(input);
 					complete = 0;
 				} else {
-					System.out.print("Invalid input. Enter new episode, 'f' for finished, or enter to skip");
+					System.out.print("Invalid input. Enter new episode, 'f' for finished, or enter to skip" +  "\n");
 					MainMenu.watchListMenu();
 				}
 				updateSqlStatement = "UPDATE watchlist SET CurrentEpisode = ?, Complete = ? WHERE SeriesID = ?";
@@ -1161,11 +1161,97 @@ public Connection connectToDatabase () {
 		}
 		
 	}
-	public void doesItExistInWatchList(String title, Object ob) {
+	public int getWatchListID(String title, Object ob) {
 		Connection con = connectToDatabase();
+		ResultSet resultSet = null; //store result from query
+		String selectSqlStatement = "";
+		int ID = 0; //holds the series/movie ID
+		
+		if(ob instanceof AnimeSeries) {
+			selectSqlStatement = "SELECT SeriesID FROM animeseries WHERE Title = ?";
+			
+		}  else if(ob instanceof AnimeMovies) {
+			selectSqlStatement = "SELECT MovieID FROM animemovies WHERE Title = ?";
+		}
+		
+		PreparedStatement selectPreparedStatement = returnStatement(con, selectSqlStatement);
+		
+		//set values
+		try {
+			selectPreparedStatement.setString(1, title);
+		} catch (SQLException e) {
+			System.out.println("Error setting select prepared statement in doesItExistInWatchList");
+			e.printStackTrace();
+		}
+		
+		//get the ID from the respective table
+		try {
+			resultSet = selectPreparedStatement.executeQuery();
+			if(resultSet.next()) {
+				//check to see if its anime or movie we are getting the id from
+				if(ob instanceof AnimeSeries) {
+					ID = resultSet.getInt("SeriesID");
+					
+				} else if(ob instanceof AnimeMovies) {
+					ID = resultSet.getInt("MovieID");
+				}
+			} else {
+				//doesn't exist
+				System.out.println("error anime doesn't exist");
+			}
+		} catch (SQLException e) {
+			System.out.println("Error executing selectPreparedStatment in doesItExistInWatchList");
+			e.printStackTrace();
+		}
+		/* check if ID is present in the watch list if it is return the watchlist ID
+		 * if it doesn't print error anime doesn't exist in watch list
+		 * */
+		
+		ResultSet watchListResultSet = null;
+		int watchListID = 0; //variable to hold the watch list id number
+		String watchListSqlStatement = "";
+		if(ob instanceof AnimeSeries) {
+			watchListSqlStatement = "SELECT WatchListID FROM watchlist WHERE SeriesID = ?";
+			
+		}
+		else if(ob instanceof AnimeMovies) {
+			watchListSqlStatement = "SELECT WatchListID FROM watchlist WHERE MovieID = ?";
+		}
+		
+		PreparedStatement watchListPreparedStatement = returnStatement(con, watchListSqlStatement);
+		
+		//set values
+		try {
+			watchListPreparedStatement.setInt(1, ID);
+		} catch (SQLException e) {
+			System.out.println("Error setting watchListPreparedStatements values");
+			e.printStackTrace();
+		}
+		
+		//execute statement and get the watch list id
+		try {
+			watchListResultSet = watchListPreparedStatement.executeQuery();
+			if(watchListResultSet.next()) {
+				//if it exist
+				watchListID = watchListResultSet.getInt("WatchListID");
+				
+			} else {
+				//anime isn't in watchlist
+				System.out.println("anime doesn't exist in the watch list");
+				MainMenu.reviewsMenu();
+			}
+		} catch (SQLException e) {
+			System.out.println("Error executing watch list prepared statement");
+			e.printStackTrace();
+		}
+		
+		return watchListID;
+	}
+	public void addReview(int watchID, double rating, String review) {
+		// TODO Auto-generated method stub
 		
 	}
 		
-	}
+}
 	
 

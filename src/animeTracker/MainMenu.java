@@ -453,7 +453,7 @@ public static void watchListMenu() {
 }
 
 //menu to add, update, delete, list, search anime reviews
-private static void reviewsMenu() {
+public static void reviewsMenu() {
 	System.out.println("*****Anime Tracker*****\n   Anime Review Menu\n");
 	System.out.println("   1. Add Review");
 	System.out.println("   2. Update Review");
@@ -517,7 +517,12 @@ private static void updateReview() {
 	
 }
 
-private static void addReview() {
+public static void addReview() {
+	/* call a method that takes the title the user inputs
+	 * gets the seriesID/movieID sees if it exist in the watchlist
+	 * if it does the user can add a review for that anime if doesn't 
+	 * print error cannot leave a review for anime not on watch list
+	 * */
 	Scanner scanner = new Scanner(System.in);
 	
 	System.out.print("Enter Anime Title To Add Review: ");
@@ -529,22 +534,60 @@ private static void addReview() {
 	//first see if anime exist at all in the database
 	Boolean checkSeries = manager.doesItExist(title, anime);
 	Boolean checkMovies = manager.doesItExist(title, movie);
+	int watchID = 0; //the watch id that will be stored in a review
 	
 	if(checkSeries) {
 	//check if the series is in the watchlist 
-		manager.doesItExistInWatchList(title, anime);
+		watchID = manager.getWatchListID(title, anime);
 	} else if(checkMovies) {
 		//check if the movie is in the watch list
-		manager.doesItExistInWatchList(title, movie);
+		watchID = manager.getWatchListID(title, movie);
 	} else {
 		System.out.println("anime does not exist"); //anime doesn't exist in the database
 	}
-	/* call a method that takes the title the user inputs
-	 * gets the seriesID/movieID sees if it exist in the watchlist
-	 * if it does the user can add a review for that anime if doesn't 
-	 * print error cannot leave a review for anime not on watch list
+	double rating = 0;
+	String input = ""; //holds input from the user
+	String review ="";
+	/* get user inputs for the review
 	 * */
-	
+	//get rating of the anime on a scale from 1.0 - 10.
+	int counter = 0; //loop counter
+	while(counter < 1) {
+		System.out.print("Rate " + title + " (Horrible) 1.0 - 10 (Peak Fiction): ");
+		input = scanner.nextLine();
+		//try to parse the input to a double
+		try {
+			rating = Double.parseDouble(input);
+		}
+			catch (Exception e) {
+				System.out.println("Enter a rating between 1.0 - 10" + " (example 7.9)");
+				continue;
+			}
+		//check if rating is greater than or equal to 1 and less than 10
+		if(rating >= 1.0 && rating < 10.0) {
+			counter++;
+			
+		} else {
+			//stay in loop until user enters a good rating and print error message
+			System.out.println("Enter a rating between 1.0 - 10" + " (example 7.9)");
+			continue;
+		}
+	}
+	// enter a text review for the anime (optional) there are no restraints on a the text review
+			System.out.println("Enter a text review for " + title + " (type 'quit' to end): or press enter to skip");
+			StringBuilder inputText = new StringBuilder();
+			//user can enter multiple lines 
+			String line;
+			while(!(line = scanner.nextLine()).equalsIgnoreCase("quit")) {
+				if(line == "" ) {break;}
+				inputText.append(line).append("\n");
+			}
+			review = inputText.toString();
+			System.out.println("rating: " + rating);
+			System.out.println("Review: " + review);
+			
+			//call the method to communicate with the database and add the review (id, rating, review)
+			manager.addReview(watchID, rating, review);
 }
 
 //method to update watch list object based on title of the series/movie
