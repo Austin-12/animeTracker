@@ -544,6 +544,7 @@ public static void addReview() {
 		watchID = manager.getWatchListID(title, movie);
 	} else {
 		System.out.println("anime does not exist"); //anime doesn't exist in the database
+		reviewsMenu();
 	}
 	double rating = 0;
 	String input = ""; //holds input from the user
@@ -564,7 +565,7 @@ public static void addReview() {
 				continue;
 			}
 		//check if rating is greater than or equal to 1 and less than 10
-		if(rating >= 1.0 && rating < 10.0) {
+		if(rating >= 1.0 && rating <= 10.0) {
 			counter++;
 			
 		} else {
@@ -583,8 +584,6 @@ public static void addReview() {
 				inputText.append(line).append("\n");
 			}
 			review = inputText.toString();
-			System.out.println("rating: " + rating);
-			System.out.println("Review: " + review);
 			
 			//call the method to communicate with the database and add the review (id, rating, review)
 			manager.addReview(watchID, rating, review);

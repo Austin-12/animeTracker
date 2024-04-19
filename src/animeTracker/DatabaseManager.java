@@ -1237,7 +1237,7 @@ public Connection connectToDatabase () {
 				
 			} else {
 				//anime isn't in watchlist
-				System.out.println("anime doesn't exist in the watch list");
+				System.out.println("anime isn't in the watch list");
 				MainMenu.reviewsMenu();
 			}
 		} catch (SQLException e) {
@@ -1247,9 +1247,43 @@ public Connection connectToDatabase () {
 		
 		return watchListID;
 	}
+	//method to add a review to the database
 	public void addReview(int watchID, double rating, String review) {
-		// TODO Auto-generated method stub
+		Connection con = connectToDatabase();
+		String sql = new String("INSERT INTO review(WatchListID, Review, Rating, ReviewDate) VALUES (?, ?, ?, ?)");
 		
+		PreparedStatement preparedStatement = returnStatement(con, sql);
+		
+		//get local date
+		LocalDate local = LocalDate.now(); //todays date
+		Date today = Date.valueOf(local);
+		
+		//set values
+		try {
+			preparedStatement.setInt(1, watchID);
+			preparedStatement.setString(2, review);
+			preparedStatement.setDouble(3, rating);
+			preparedStatement.setDate(4, today);
+		} catch (SQLException e) {
+			System.out.println("error setting values in add review");
+			e.printStackTrace();
+		}
+		
+		//execute statement
+		try {
+			int count = preparedStatement.executeUpdate();
+			if(count == 1) {
+				System.out.println("Review added");
+				MainMenu.reviewsMenu();
+				
+			} else {
+				System.out.println("error adding new review");
+				MainMenu.reviewsMenu();
+			}
+		} catch (SQLException e) {
+			System.out.println("error executing add review statement");
+			e.printStackTrace();
+		}
 	}
 		
 }
