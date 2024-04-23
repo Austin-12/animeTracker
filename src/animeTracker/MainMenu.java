@@ -503,7 +503,10 @@ private static void searchReview() {
 }
 
 private static void listReview() {
-	// TODO Auto-generated method stub
+	DatabaseManager manager = new DatabaseManager();
+	/* call a method in database manger to list all the reviews in the database
+	 */
+	manager.listReviews();
 	
 }
 

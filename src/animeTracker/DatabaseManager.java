@@ -1285,6 +1285,29 @@ public Connection connectToDatabase () {
 			e.printStackTrace();
 		}
 	}
+	//method to list reviews
+	public void listReviews() {
+		/* Title (for both series/ movies)
+		 * Rating
+		 * Review
+		 * ReviewDate
+		 * */
+		Connection con = connectToDatabase();
+		String seriesReviewInfo = "SELECT animeseries.Title, review.Rating, review.Review, review.ReviewDate"
+				+ "FROM animeseries"
+				+ "JOIN watchlist ON animeseries.seriesID = watchlist.seriesID"
+				+ "JOIN review ON watchlist.WatchListID = review.WatchListID";
+		
+		String movieReviewInfo = "SELECT animemovies.Title, review.Rating, review.Review, review.ReviewDate"
+				+ "FROM animemovies"
+				+ "JOIN watchlist ON animemovies.MovieID = watchlist.MovieID"
+				+ "JOIN review ON watchlist.WatchListID = review.WatchListID";
+		
+		PreparedStatement seriespreparedStatement = returnStatement(con,seriesReviewInfo);
+		PreparedStatement seriespreparedStatement1 = returnStatement(con,movieReviewInfo);
+		
+		
+	}
 		
 }
 	
