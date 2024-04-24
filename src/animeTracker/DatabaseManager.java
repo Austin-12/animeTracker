@@ -1293,22 +1293,66 @@ public Connection connectToDatabase () {
 		 * ReviewDate
 		 * */
 		Connection con = connectToDatabase();
-		String seriesReviewInfo = "SELECT animeseries.Title, review.Rating, review.Review, review.ReviewDate"
-				+ "FROM animeseries"
-				+ "JOIN watchlist ON animeseries.seriesID = watchlist.seriesID"
-				+ "JOIN review ON watchlist.WatchListID = review.WatchListID";
+		ResultSet resultSet1 = null; // will hold series info
+		ResultSet resultSet2 = null; // will hold movie info
 		
-		String movieReviewInfo = "SELECT animemovies.Title, review.Rating, review.Review, review.ReviewDate"
-				+ "FROM animemovies"
-				+ "JOIN watchlist ON animemovies.MovieID = watchlist.MovieID"
-				+ "JOIN review ON watchlist.WatchListID = review.WatchListID";
+		String seriesReviewInfo = "SELECT animeseries.Title, review.Rating, review.Review, review.ReviewDate "
+			    + "FROM animeseries "
+			    + "JOIN watchlist ON animeseries.seriesID = watchlist.seriesID "
+			    + "JOIN review ON watchlist.WatchListID = review.WatchListID";
+
 		
-		PreparedStatement seriespreparedStatement = returnStatement(con,seriesReviewInfo);
-		PreparedStatement seriespreparedStatement1 = returnStatement(con,movieReviewInfo);
+		String movieReviewInfo = "SELECT animemovies.Title, review.Rating, review.Review, review.ReviewDate "
+			    + "FROM animemovies "
+			    + "JOIN watchlist ON animemovies.MovieID = watchlist.MovieID "
+			    + "JOIN review ON watchlist.WatchListID = review.WatchListID";
+
 		
+		PreparedStatement seriesPreparedStatement = returnStatement(con,seriesReviewInfo);
+		PreparedStatement moviePreparedStatement1 = returnStatement(con,movieReviewInfo);
+		try {
+			resultSet1 = seriesPreparedStatement.executeQuery();
+			resultSet2 = moviePreparedStatement1.executeQuery();
+			
+				int seriesCount =printReviewInfo(resultSet1, "*Anime Series*");
+				int movieCount =printReviewInfo(resultSet2, "*Anime Movie*");
+				
+				if(seriesCount + movieCount == 2) {
+					System.out.println("no reviews found");
+					MainMenu.reviewsMenu();
+				} else {
+					//we printed off the list now go back to the main menu
+					MainMenu.reviewsMenu();
+				}
+					
+		} catch (SQLException e) {
+			System.out.println("Error executing prepared statementse in list reviews");
+			e.printStackTrace();
+		}
 		
 	}
+	//method to print the review information
+	public int printReviewInfo(ResultSet resultSet, String header) throws SQLException {
+		if(!resultSet.next()) {
+			//return 1 if no review in the result set
+			return 1;
+		}
+		else {
+			do {
+				String title = resultSet.getString("Title");
+		        double rating = resultSet.getDouble("Rating");
+		        String review = resultSet.getString("Review");
+		        Date reviewDate = resultSet.getDate("ReviewDate");
+		        
+		        System.out.println(header);
+		        System.out.println("Title: " + title + "\nRating: " + rating + "\nReview: " + review + "Review Date: " + reviewDate);
+		        System.out.println("");
+			} while(resultSet.next());
+		}
+		return 2;
 		
+	}
+
 }
 	
 
