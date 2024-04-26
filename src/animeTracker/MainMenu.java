@@ -498,7 +498,51 @@ Scanner input = new Scanner(System.in); //scanner object
 
 
 private static void searchReview() {
-	// TODO Auto-generated method stub
+	Scanner scanner = new Scanner(System.in);
+	System.out.print("Enter anime title to search review: ");
+	
+	String title = scanner.nextLine();
+	
+	//check to see if the title exist first
+	DatabaseManager manager = new DatabaseManager();
+	AnimeSeries anime = new AnimeSeries();
+	AnimeMovies movie = new AnimeMovies();
+	
+	Boolean seriesExist = manager.doesItExist(title, anime);
+	Boolean movieExist = manager.doesItExist(title, movie);
+	int watchListID = 0;
+	
+	if(seriesExist) {
+		//exist in anime series table now get the watch list ID
+		watchListID = manager.getWatchListID(title, anime);
+		
+		//if watchListID is greater than 0 then it exist in the watchlist if not then print off error message
+		if(watchListID > 0) {
+			manager.searchReview(title, watchListID);
+			
+		} else {
+			System.out.println("anime does not exist in watch list");
+			reviewsMenu();
+		}
+		
+	} else if(movieExist) {
+		//exist in movie table
+		watchListID = manager.getWatchListID(title, movie);
+		
+		if(watchListID > 0) {
+			manager.searchReview(title, watchListID);
+			
+		} else {
+			System.out.println("anime does not exist in watch list");
+			reviewsMenu();
+		}
+		
+	} else {
+		System.out.print("anime does not exist");
+		reviewsMenu();
+	}
+	
+	
 	
 }
 
@@ -511,7 +555,22 @@ private static void listReview() {
 }
 
 private static void removeReview() {
-	// TODO Auto-generated method stub
+	Scanner scanner = new Scanner(System.in);
+	System.out.print("Enter review ID to delete review: ");
+	String input = scanner.nextLine();
+	int ID = 0;
+	
+//try to convert the input into a int if not print error message and go to the reviewsMenu
+	try {
+		 ID = Integer.parseInt(input);
+	} catch (Exception e) {
+		System.out.println("Invalid input, enter a number");
+		reviewsMenu();
+	}
+	//call method in database with the ID to delete the review
+	DatabaseManager manager = new DatabaseManager();
+	manager.deleteReview(ID);
+
 	
 }
 

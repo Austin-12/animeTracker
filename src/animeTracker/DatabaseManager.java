@@ -1291,21 +1291,24 @@ public Connection connectToDatabase () {
 		 * Rating
 		 * Review
 		 * ReviewDate
+		 * ReviewID
 		 * */
 		Connection con = connectToDatabase();
 		ResultSet resultSet1 = null; // will hold series info
 		ResultSet resultSet2 = null; // will hold movie info
 		
-		String seriesReviewInfo = "SELECT animeseries.Title, review.Rating, review.Review, review.ReviewDate "
-			    + "FROM animeseries "
-			    + "JOIN watchlist ON animeseries.seriesID = watchlist.seriesID "
-			    + "JOIN review ON watchlist.WatchListID = review.WatchListID";
+		String seriesReviewInfo = "SELECT animeseries.Title, review.Rating, review.Review, review.ReviewDate, review.ReviewID "
+                + "FROM animeseries "
+                + "JOIN watchlist ON animeseries.seriesID = watchlist.seriesID "
+                + "JOIN review ON watchlist.WatchListID = review.WatchListID";
+
 
 		
-		String movieReviewInfo = "SELECT animemovies.Title, review.Rating, review.Review, review.ReviewDate "
-			    + "FROM animemovies "
-			    + "JOIN watchlist ON animemovies.MovieID = watchlist.MovieID "
-			    + "JOIN review ON watchlist.WatchListID = review.WatchListID";
+		String movieReviewInfo = "SELECT animemovies.Title, review.Rating, review.Review, review.ReviewDate, review.ReviewID "
+                + "FROM animemovies "
+                + "JOIN watchlist ON animemovies.MovieID = watchlist.MovieID "
+                + "JOIN review ON watchlist.WatchListID = review.WatchListID";
+
 
 		
 		PreparedStatement seriesPreparedStatement = returnStatement(con,seriesReviewInfo);
@@ -1343,13 +1346,49 @@ public Connection connectToDatabase () {
 		        double rating = resultSet.getDouble("Rating");
 		        String review = resultSet.getString("Review");
 		        Date reviewDate = resultSet.getDate("ReviewDate");
+		        int ID = resultSet.getInt("ReviewID");
 		        
 		        System.out.println(header);
-		        System.out.println("Title: " + title + "\nRating: " + rating + "\nReview: " + review + "Review Date: " + reviewDate);
+		        System.out.println("Title: " + title + "\nID: " + ID + "\nRating: " + rating + "\nReview: " + review + "Review Date: " + reviewDate);
 		        System.out.println("");
 			} while(resultSet.next());
 		}
 		return 2;
+		
+	}
+	//method deletes review by the review iD
+	public void deleteReview(int ID) {
+		Connection con = connectToDatabase();
+		String sql = "DELETE FROM review WHERE ReviewID = ?";
+		
+		PreparedStatement preparedStatement = returnStatement(con, sql);
+		
+		//insert values
+		try {
+			preparedStatement.setInt(1, ID);
+		} catch (SQLException e) {
+			System.out.println("Error setting ID value in prepared statement");
+			e.printStackTrace();
+		}
+		
+		try {
+			int rowCount = preparedStatement.executeUpdate();
+			if(rowCount == 1) {
+				System.out.println("Review deleted");
+				MainMenu.reviewsMenu();
+			} else {
+				System.out.println("Review not found");
+				MainMenu.reviewsMenu();
+			}
+		} catch (SQLException e) {
+			System.out.println("Error executing review delete statement");
+			e.printStackTrace();
+		}
+	}
+	//search and display review
+	public void searchReview(String title, int watchListID) {
+		Connection con = connectToDatabase();
+		
 		
 	}
 
