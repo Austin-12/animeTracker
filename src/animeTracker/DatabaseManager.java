@@ -1386,12 +1386,175 @@ public Connection connectToDatabase () {
 		}
 	}
 	//search and display review
-	public void searchReview(String title, int watchListID) {
+	public void searchReview(String title, int watchListID, Object ob) {
 		Connection con = connectToDatabase();
+		ResultSet resultSet = null;
+		String sql = "SELECT ReviewID, Review, Rating, ReviewDate FROM review WHERE WatchListID = ?";
 		
+		PreparedStatement preparedStatement = returnStatement(con, sql);
+		
+		//set values
+		try {
+			preparedStatement.setInt(1, watchListID);
+		} catch (SQLException e) {
+			System.out.println("error setting values in searchReview");
+			e.printStackTrace();
+		}
+		//execute statement
+		try {
+			resultSet = preparedStatement.executeQuery();
+			if(!resultSet.next()) {
+				System.out.println("No review found."); //if name isn't found
+				MainMenu.reviewsMenu();
+			}
+			//print the reviews
+			do {
+				int ID = resultSet.getInt("ReviewID");
+				String review = resultSet.getString("Review");
+				Double rating = resultSet.getDouble("Rating");
+				Date reviewDate = resultSet.getDate("ReviewDate");
+				
+				//change the heading depending on series/movie object
+				String header = "";
+				if(ob instanceof AnimeSeries) {
+					header = "*Anime Series*";
+				} else if(ob instanceof AnimeMovies) {
+					header = "*Anime Movie*";
+				}
+				System.out.println(header + "\nTitle: " + title + "\nID: " + ID + "\nRating: " + rating + "\nReview: " + review + "Review Date: " + reviewDate + "\n");
+				
+			} while(resultSet.next());
+			
+		} catch (SQLException e) {
+			System.out.println("error executing prepared statement in searchReview");
+			e.printStackTrace();
+		}
+	}
+	public void updateReview(int ID) {
+		Connection con = connectToDatabase(); 
+		ResultSet resultSet = null;
+		
+		String sql = "SELECT Review, Rating FROM review WHERE ReviewID = ?";
+		
+		PreparedStatement preparedStatement = returnStatement(con, sql);
+		
+		//set values
+		try {
+			preparedStatement.setInt(1, ID);
+		} catch (SQLException e) {
+			System.out.println("Error setting values in prepared statment in updateReview");
+			e.printStackTrace();
+		}
+		//values to update
+		String review = "";
+		Double rating = 0.0;
+		//execute statement
+		try {
+			resultSet = preparedStatement.executeQuery();
+			if(!resultSet.next()) {
+				System.out.println("review not found");
+				MainMenu.reviewsMenu();
+			}
+			else {
+			do {
+				review = resultSet.getString("Review");
+				rating = resultSet.getDouble("Rating");
+				
+			} while(resultSet.next());
+		}
+		} catch (SQLException e) {
+			System.out.println("error exectuting prepared statement in updateReview");
+			e.printStackTrace();
+		}
+		//new values changed by the user
+		Scanner scanner = new Scanner(System.in);
+		
+		String newReview = "";
+		Double newRating = 0.0;
+		
+		System.out.print("Current rating: " + rating + ". Enter new rating or Enter key to skip: ");
+		String input = scanner.nextLine();
+		Boolean validInput = false;
+		
+		while(!validInput) {
+			
+		if(input.isEmpty()) { //break out of loop if input is empty
+			newRating = rating;
+			break;
+		}
+		
+			//try to convert the input to a double
+			try {
+				newRating = Double.parseDouble(input);
+				
+				//check if the newRating is within the bounds 1.0 - 10
+				if(newRating >= 1.0 && newRating <= 10) {
+					validInput = true;
+				} else {
+					System.out.println("Error: Invalid input. enter between 1.0 - 10");
+					
+				}
+			} catch(NumberFormatException e) {
+				System.out.println("Error: Invalid input. Please enter a valid number ");
+				
+			}
+			if(!validInput) {
+				System.out.print("Enter new rating or Enter key to skip: ");
+				input = scanner.nextLine();
+			}
+	} //end of while loop
+		System.out.println("Current Review: " + "\n" + review + "\nEnter new review (type 'quit' to end) or Enter key to skip: ");
+		StringBuilder inputText = new StringBuilder();
+		//user can enter multiple lines 
+		String line;
+		
+		while(!(line = scanner.nextLine()).equalsIgnoreCase("quit")) {
+			if(line.isEmpty()) {
+				newReview = review;
+				break;
+				
+			} else {
+				
+			if(line == "" ) {break;}
+			inputText.append(line).append("\n");
+			newReview = inputText.toString();
+		}
+	} //end of while loop
+		
+		//insert the new values into the database
+		String updateSql = "UPDATE review SET Review = ?, Rating = ?, ReviewDate = ? WHERE ReviewID = ?";
+		PreparedStatement updatePreparedStatement = returnStatement(con,updateSql);
+		
+		LocalDate local = LocalDate.now(); //todays date
+		Date today = Date.valueOf(local);
+		//set values
+		try {
+			updatePreparedStatement.setString(1, newReview);
+			updatePreparedStatement.setDouble(2, newRating);
+			updatePreparedStatement.setDate(3, today);
+			updatePreparedStatement.setInt(4, ID);
+		} catch (SQLException e) {
+			System.out.println("Error: setting values in update review");
+			e.printStackTrace();
+		}
+		
+		//execute statement
+		try {
+			int update = updatePreparedStatement.executeUpdate();
+			if(update == 1) {
+				System.out.println("Review updated");
+				MainMenu.reviewsMenu();
+			} else {
+				System.out.println("Error: review update failed");
+				MainMenu.reviewsMenu();
+			}
+		} catch (SQLException e) {
+			System.out.println("error executing update review statement");
+			e.printStackTrace();
+		}
 		
 	}
-
 }
+	
 	
 

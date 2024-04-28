@@ -518,10 +518,10 @@ private static void searchReview() {
 		
 		//if watchListID is greater than 0 then it exist in the watchlist if not then print off error message
 		if(watchListID > 0) {
-			manager.searchReview(title, watchListID);
+			manager.searchReview(title, watchListID, anime);
 			
 		} else {
-			System.out.println("anime does not exist in watch list");
+			System.out.println("anime does not exist in watch list" + "\n");
 			reviewsMenu();
 		}
 		
@@ -530,15 +530,15 @@ private static void searchReview() {
 		watchListID = manager.getWatchListID(title, movie);
 		
 		if(watchListID > 0) {
-			manager.searchReview(title, watchListID);
+			manager.searchReview(title, watchListID, movie);
 			
 		} else {
-			System.out.println("anime does not exist in watch list");
+			System.out.println("anime does not exist in watch list" + "\n");
 			reviewsMenu();
 		}
 		
 	} else {
-		System.out.print("anime does not exist");
+		System.out.println("anime does not exist" + "\n");
 		reviewsMenu();
 	}
 	
@@ -575,8 +575,22 @@ private static void removeReview() {
 }
 
 private static void updateReview() {
-	// TODO Auto-generated method stub
+	Scanner scanner = new Scanner(System.in);
+	int ID = 0;
+	System.out.print("Enter review ID to update review: ");
+	String input = scanner.next();
 	
+	//try to parse into a int if you can call method to talk to the database if not print error message
+	try {
+	ID = Integer.parseInt(input);
+	
+	} catch(Exception e) {
+		System.out.println("Error inccorect input enter a digit");
+		reviewsMenu();
+	}
+	
+	DatabaseManager manager = new DatabaseManager();
+	manager.updateReview(ID);
 }
 
 public static void addReview() {
